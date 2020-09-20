@@ -34,7 +34,7 @@ function initDB(callback) {
 }
 
 function createDatabase(callback) {
-  db = new sqlite.Database(':memory:', (err) => {
+  db = new sqlite.Database(process.env.USE_PERSISTENT_DB ? './db/local.db' : ':memory:', (err) => {
     if (err) {
       return console.error(err.message);
     }
