@@ -121,16 +121,23 @@ app.get('/users', (req, res, next) => {
   if (type === 'Startups') type = 2;
   else type = 1;
 
+  let userId;
+  if (typeof req.query.userId !== 'undefined') userId = req.query.userId;
+  else userId = req.session.userID;
+
   database.getUsers(type, true, (err, userList) => {
     if (err) return next(err);
     const userArray = [];
     for (const user in userList) {
       const userData = userList[user];
+
+      if (userData.id !== userId) continue;
+
       const userObj = {
         id: userData.id,
         name: user,
         description: userData.description,
-        img: '../app/imgs/coach_placeholder.png',
+        img: '../app/imgs/coach_placeholder.png'
       };
       userArray.push(userObj);
     }
@@ -165,7 +172,7 @@ app.get('/profile', (req, res, next) => {
 
   database.getProfile(id, (err, result) => {
     if (err) return next(err);
-    if (req.session.userID == id || req.session.userType === 'admin') {
+    if (req.session.userID === id || req.session.userType === 'admin') {
       Object.assign(result, { canModify: true });
     }
     res.json(result);
@@ -270,7 +277,7 @@ app.post('/timetable', (req, res, next) => {
 
 app.get('/comingTimeslots', (req, res, next) => {
   const timeslots = {};
-// Result is in form {date: {name: [time/null, email]}
+  // Result is in form {date: {name: [time/null, email]}
   database.getComingTimeslots((err, result) => {
     if (err) return next(err);
     for (const index in result) { //eslint-disable-line
