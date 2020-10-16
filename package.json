@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "start": "npm run eslint && webpack-dev-server",
-    "start-heroku": "webpack-dev-server",
+    "start": "webpack-dev-server",
     "eslint": "eslint --ext .jsx --ext .js app/",
     "test": "jest tests/*"
   },
