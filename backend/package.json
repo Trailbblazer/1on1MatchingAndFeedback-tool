@@ -20,7 +20,5 @@
     "session-file-store": "^1.4.0",
     "sqlite3": "^5.0.0"
   },
-  "devDependencies": {
-    
-  }
+  "devDependencies": {}
 }

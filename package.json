@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "install": "cd frontend && npm install && cd ../backend && npm install",
-    "start": "cd frontend && npm run build && cp -R build ../backend/ && cd ../backend && node index.js",
-    "heroku-postbuild": "npm install && npm start"
+    "frontend-build": "cd frontend && npm run build && cp -R build ../backend/",
+    "start": "npm run frontend-build && cd ../backend && node index.js",
+    "heroku-postbuild": "npm run frontend-build"
   }
 }
