@@ -1,6 +1,8 @@
 /* eslint-disable */
 var webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
     template: __dirname + '/app/index.html',
     filename: 'index.html',
@@ -46,8 +48,7 @@ module.exports = {
         proxy: {
           '/api/': {
             target: 'http://127.0.0.1:3000/',
-            secure: false,
-            pathRewrite: {'^/api/' : '/'}
+            secure: false
           }
         },
     }
