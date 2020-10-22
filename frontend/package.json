@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -p --progress && mkdir -p build/app/imgs && cp -R app/imgs/ build/app/imgs",
+    "build": "webpack -p --progress && mkdir -p build/app/ && cp -R app/imgs build/app/",
     "start": "npm run eslint && webpack-dev-server",
     "eslint": "eslint --ext .jsx --ext .js app/",
     "test": "jest tests/*"
