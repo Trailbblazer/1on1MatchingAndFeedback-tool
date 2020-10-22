@@ -1,1 +1,1 @@
-web: npm start
+web: webpack -p --progress && node server.js
