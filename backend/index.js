@@ -1,3 +1,4 @@
+var path = require('path');
 const express = require('express');
 const readline = require('readline');
 const bodyParser = require('body-parser');
@@ -8,12 +9,14 @@ const FileStore = require('session-file-store')(session);
 const matchmaking = require('./matchmaking.js');
 
 
-const app = express();
-
 database.createDatabase((err) => {
   if (err) console.log(err);
   console.log('Data loaded');
 });
+
+const app = express();
+
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -37,7 +40,7 @@ app.use((req, res, next) => {
   res.append('Access-Control-Allow-Credentials', 'true');
 
   // if user has not logged in, returns not authorized and ends the request
-  if (!req.session.userID && req.path !== '/login') {
+  if (!req.session.userID && req.path !== '/api/login') {
     res.sendStatus(401);
     return;
   }
@@ -47,7 +50,7 @@ app.use((req, res, next) => {
 
 // logs user in and sets for session:
 // userID = user's personal id and type = one of 'coach', 'startup', 'admin'
-app.post('/login', (req, res) => {
+app.post('/api/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   // bcrypt.hash(password, 10, (err, hash) => console.log(hash));
@@ -63,7 +66,7 @@ app.post('/login', (req, res) => {
 /**
  * Handles the requests to change password.
  */
-app.post('/changePassword', (req, res, next) => {
+app.post('/api/changePassword', (req, res, next) => {
   const JSONObject = JSON.parse(req.body.data);
   const currentPassword = JSONObject.currentPassword;
   const newPassword = JSONObject.newPassword;
@@ -116,7 +119,7 @@ app.get('/api', (req, res, next) => {
 
 
 /* gets the initial data from all the coaches or startups */
-app.get('/users', (req, res, next) => {
+app.get('/api/users', (req, res, next) => {
   let type = req.query.type;
   if (type === 'Startups') type = 2;
   else type = 1;
@@ -146,7 +149,7 @@ app.get('/users', (req, res, next) => {
   });
 });
 
-app.post('/create_user', (req, res, next) => {
+app.post('/api/create_user', (req, res, next) => {
   // Only admins can do this.
   if (req.session.userType === 'admin') {
     const userInfo = req.body;
@@ -165,7 +168,7 @@ app.post('/create_user', (req, res, next) => {
 
 /* gets a profile data for a defined user or
   for the requesting user if no requested id is provided */
-app.get('/profile', (req, res, next) => {
+app.get('/api/profile', (req, res, next) => {
   let id;
   if (typeof req.query.userId !== 'undefined') id = req.query.userId;
   else id = req.session.userID;
@@ -185,7 +188,7 @@ app.get('/profile', (req, res, next) => {
 // coaches: [{name, id, active}]
 // startups: [{name, id, active}]
 // }
-app.get('/activeStatuses', (req, res, next) => {
+app.get('/api/activeStatuses', (req, res, next) => {
   database.getActiveStatuses((err, data) => {
     if (err) return next(err);
     return res.json(data);
@@ -193,7 +196,7 @@ app.get('/activeStatuses', (req, res, next) => {
 });
 
 
-app.get('/timetable', (req, res, next) => {
+app.get('/api/timetable', (req, res, next) => {
   const allMeetings = [];
   database.getUserMap((err, keys) => {
     if (err) return next(err);
@@ -264,7 +267,7 @@ app.get('/timetable', (req, res, next) => {
   });
 });
 
-app.post('/timetable', (req, res, next) => {
+app.post('/api/timetable', (req, res, next) => {
   const schedule = JSON.parse(req.body.schedule);
   database.updateTimetable(schedule, req.body.date, (err) => {
     if (err) {
@@ -275,7 +278,7 @@ app.post('/timetable', (req, res, next) => {
   });
 });
 
-app.get('/comingTimeslots', (req, res, next) => {
+app.get('/api/comingTimeslots', (req, res, next) => {
   const timeslots = {};
   // Result is in form {date: {name: [time/null, email]}
   database.getComingTimeslots((err, result) => {
@@ -298,7 +301,7 @@ app.get('/comingTimeslots', (req, res, next) => {
   });
 });
 
-app.get('/numberOfTimeslots', (req, res, next) => {
+app.get('/api/numberOfTimeslots', (req, res, next) => {
   const timeslots = {};
   // Result is in form [{name:"coachname",date:"dateString",time:"timestring",duration:null}]
   database.getComingTimeslots((err, result) => {
@@ -318,7 +321,7 @@ app.get('/numberOfTimeslots', (req, res, next) => {
   });
 });
 
-app.get('/givenFeedbacks/', (req, res, next) => {
+app.get('/api/givenFeedbacks/', (req, res, next) => {
   const givenFeedbacks = {
     startups: {},
     coaches: {},
@@ -374,7 +377,7 @@ app.get('/givenFeedbacks/', (req, res, next) => {
 });
 
 /* gets the pending feedbacks from last meeting for a specific user */
-app.get('/feedback', (req, res, next) => {
+app.get('/api/feedback', (req, res, next) => {
   const id = req.session.userID;
   database.getFeedback(id, (err, result) => {
     if (err) return next(err);
@@ -386,7 +389,7 @@ app.get('/feedback', (req, res, next) => {
   });
 });
 
-app.get('/userMeetings', (req, res, next) => {
+app.get('/api/userMeetings', (req, res, next) => {
   let meetingDate;
   const id = req.session.userID;
   const type = req.session.userType;
@@ -415,7 +418,7 @@ app.get('/userMeetings', (req, res, next) => {
 });
 
 /* sets either coach_rating or startup_rating for a specific meeting */
-app.post('/giveFeedback', (req, res, next) => {
+app.post('/api/giveFeedback', (req, res, next) => {
   const userType = req.session.userType;
   const meetingId = req.body.meetingId;
   const rating = req.body.rating;
@@ -427,7 +430,7 @@ app.post('/giveFeedback', (req, res, next) => {
   });
 });
 
-app.post('/setActiveStatus', (req, res, next) => {
+app.post('/api/setActiveStatus', (req, res, next) => {
   const id = req.body.id;
   const active = req.body.active;
   database.setActiveStatus(id, active, (err, result) => {
@@ -437,7 +440,7 @@ app.post('/setActiveStatus', (req, res, next) => {
 });
 
 /* adds a new meeting day */
-app.post('/createMeetingDay', (req, res, next) => {
+app.post('/api/createMeetingDay', (req, res, next) => {
   if (!requireAdmin(req, res)) return;
   const date = req.body.date;
   const start = req.body.start;
@@ -495,7 +498,7 @@ function runAlgorithm(date, callback, commit = true) {
 }
 
 // TODO sanitize date;
-app.post('/runMatchmaking', (req, res) => {
+app.post('/api/runMatchmaking', (req, res) => {
   if (req.body.date) {
     runAlgorithm(req.body.date, result => res.json({ success: result }));
   } else {
@@ -503,7 +506,7 @@ app.post('/runMatchmaking', (req, res) => {
   }
 });
 /* gets the still to come meeting days with given availabilities for a specific user */
-app.get('/getComingMeetingDays', (req, res, next) => {
+app.get('/api/getComingMeetingDays', (req, res, next) => {
   database.getComingMeetingDays(req.session.userID, (err, result) => {
     if (err) return next(err);
     res.json(result);
@@ -512,7 +515,7 @@ app.get('/getComingMeetingDays', (req, res, next) => {
 });
 
 /* Sets the users availability for a specific day */
-app.post('/insertAvailability', (req, res, next) => {
+app.post('/api/insertAvailability', (req, res, next) => {
   const userId = req.session.userID;
   const date = req.body.date;
   const startTime = req.body.start;
@@ -531,7 +534,7 @@ app.use((err, req, res, next) => {
   res.status(500).send({ error: 'An error has occured!' });
 });
 
-app.post('/updateProfile', (req, res, next) => {
+app.post('/api/updateProfile', (req, res, next) => {
   // Create a JSON object from request body.
   const JSONObject = JSON.parse(req.body.data);
   let userType = JSONObject.type;

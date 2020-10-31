@@ -19,5 +19,6 @@
     "jest": "^26.4.2",
     "session-file-store": "^1.4.0",
     "sqlite3": "^5.0.0"
-  }
+  },
+  "devDependencies": {}
 }

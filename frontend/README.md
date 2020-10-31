@@ -1,4 +1,4 @@
-# sauna
+# StartupSauna
 
 1. Kloonatkaa sauna repository
 2. Asentakaa npm omalle koneelle
