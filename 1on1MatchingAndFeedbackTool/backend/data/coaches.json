@@ -1,0 +1,22 @@
+{
+  "Coach 0": {
+    "Coach_id": 0,
+    "Needs_break": false
+  },
+  "Coach 1": {
+    "Coach_id": 1,
+    "Needs_break": true
+  },
+  "Coach 2": {
+    "Coach_id": 2,
+    "Needs_break": false
+  },
+  "Coach 3": {
+    "Coach_id": 3,
+    "Needs_break": true
+  },
+  "Coach 4": {
+    "Coach_id": 4,
+    "Needs_break": false
+  }
+}
