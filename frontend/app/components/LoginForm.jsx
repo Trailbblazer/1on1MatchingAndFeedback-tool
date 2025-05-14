@@ -73,3 +73,5 @@ LoginForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   errorMessage: PropTypes.string.isRequired,
 };
+
+// <div className="container">
