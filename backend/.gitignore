@@ -1,7 +1,0 @@
-__pycache__/
-*.pyc
-*.csv
-*.csv#
-node_modules
-sessions
-build/
