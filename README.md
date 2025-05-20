@@ -8,10 +8,27 @@ The **1on1MatchingAndFeedbackTool** is a project designed to match startups and 
 ## Backend Setup
 
 ### Step 1: Install Dependencies
-```bash
-cd Sauna-Trainee/1on1MatchingAndFeedbackTool/backend
+
+Follow these steps to clone this repository and run the project locally:
+
+bash
+Copy
+Edit
+# Clone the repository
+git clone https://github.com/your-username/your-repository-name.git
+
+# Navigate into the project directory
+cd your-repository-name
+
+# (Optional) Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# Install dependencies (if any requirements.txt is provided)
 pip install -r requirements.txt
-```
+
+# Run your Python file
+python main.py
 
 ### Step 2: Setup SQLite JDBC Driver
 - Ensure the SQLite JDBC driver (version 3.45.1) is installed.
