@@ -15,7 +15,7 @@ bash
 Copy
 Edit
 # Clone the repository
-git clone https://github.com/your-username/your-repository-name.git
+git clone https://gitlab.com/SampoAccelerator/1on1MatchingAndFeedback-tool.git
 
 # Navigate into the project directory
 cd your-repository-name
