@@ -5,20 +5,19 @@ import AddStartup from "./pages/AddStartup/AddStartup";
 import AddStartupView from "./pages/AddStartupView/AddStartupView";
 import AddCoaches from "./pages/AddCoaches/AddCoaches";
 import AddCoachesView from "./pages/AddCoachesView/AddCoachesView";
-import StartMatching from "./pages/StartMatching/Start Matching";
+import StartMatching from "./pages/StartMatching/Start Matching"; // <- fixed import
 import SignupPage from "./pages/login/SignupPage";
-
 import LoginPage from "./pages/login/LoginPage";
+import { StrictMode } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // This would be called after successful login
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
 
-  // Protected route component
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
       return <Navigate to="/login" replace />;
@@ -27,69 +26,73 @@ function App() {
   };
 
   return (
-    <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route 
-          path="/login" 
-          element={<LoginPage onLogin={handleLogin} />} 
-        />
-         <Route path="/signup" element={<SignupPage />} />
-        
-        {/* Protected routes */}
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/add-startup" 
-          element={
-            <ProtectedRoute>
-              <AddStartup />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/view-startups" 
-          element={
-            <ProtectedRoute>
-              <AddStartupView />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/add-coaches" 
-          element={
-            <ProtectedRoute>
-              <AddCoaches />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/view-coaches" 
-          element={
-            <ProtectedRoute>
-              <AddCoachesView />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/start-matching" 
-          element={
-            <ProtectedRoute>
-              <StartMatching />
-            </ProtectedRoute>
-          } 
-        />
+    <StrictMode>
+      <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID"> {/* <- add clientId */}
+        <Router>
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/login"
+              element={<LoginPage onLogin={handleLogin} />}
+            />
+            <Route path="/signup" element={<SignupPage />} />
 
-        {/* Redirect to login by default */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </Router>
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-startup"
+              element={
+                <ProtectedRoute>
+                  <AddStartup />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/view-startups"
+              element={
+                <ProtectedRoute>
+                  <AddStartupView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-coaches"
+              element={
+                <ProtectedRoute>
+                  <AddCoaches />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/view-coaches"
+              element={
+                <ProtectedRoute>
+                  <AddCoachesView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/start-matching"
+              element={
+                <ProtectedRoute>
+                  <StartMatching />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Redirect to login by default */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </GoogleOAuthProvider>
+    </StrictMode>
   );
 }
 
