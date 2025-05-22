@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
-
+import { GoogleLogin } from '@react-oauth/google';
+import jwt_decode from 'jwt-decode';
 const SignupPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

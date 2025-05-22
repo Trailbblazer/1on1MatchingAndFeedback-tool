@@ -12,6 +12,7 @@ import { StrictMode } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
+  const CLINET_ID = 884933282507-roa52cm6ntvi89mebusvv13hppgu0l5p.apps.googleusercontent.com;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -27,7 +28,7 @@ function App() {
 
   return (
     <StrictMode>
-      <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID"> {/* <- add clientId */}
+      <GoogleOAuthProvider clientId={CLINET_ID}> {/* <- add clientId */}
         <Router>
           <Routes>
             {/* Public routes */}
