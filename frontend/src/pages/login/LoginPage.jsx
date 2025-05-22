@@ -48,7 +48,7 @@ const LoginPage = () => {
         <div className="flex flex-col justify-center w-1/2 p-12 text-white bg-gradient-to-br from-blue-600 to-purple-600">
           <h1 className="mb-6 text-4xl font-bold ">Welcome to Platform</h1>
           <p className="mb-8 text-lg">
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+           join our community and get access to exclusive features. Create your account and start your journey with us today.
           </p>
           <div className="flex items-center">
             <div className="flex items-center justify-center w-12 h-12 mr-4 bg-white rounded-full bg-opacity-20">
