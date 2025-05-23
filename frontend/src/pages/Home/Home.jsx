@@ -1,21 +1,24 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div
         data-dialog-backdrop="web-3-modal"
         data-dialog-backdrop-close="true"
         className="inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300"
       >
         <div
-          className="relative m-4 rounded-lg bg-white shadow-sm"
+          className="relative m-4 bg-white rounded-lg shadow-sm"
           data-dialog="web-3-modal"
         >
           <div className="flex items-start justify-between p-4">
-            <div className="text-center w-full">
+            <div className="w-full text-center">
               <h5 className="text-xl font-medium text-slate-800">Sauna tool</h5>
-              <p className="text-slate-500 text-sm font-light">
+              <p className="text-sm font-light text-slate-500">
                 Choose which tool you want to use
               </p>
             </div>
@@ -26,60 +29,59 @@ export default function Home() {
                 Input Tool
               </p>
               <button
-                className="w-full mt-3 rounded-md flex items-center justify-center border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center justify-center w-full px-4 py-2 mt-3 text-sm text-center transition-all border rounded-md shadow-sm border-slate-300 hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"
-                onClick={() => (window.location.href = "/add-startup")}
+                onClick={() => navigate("/add-startup")}
               >
-                <span className="h-5 w-5 mr-2">🦄</span> {/* Unicorn Emoji */}
+                <span className="w-5 h-5 mr-2">🦄</span>
                 Add Startup
               </button>
 
               <button
-                className="w-full mt-2 rounded-md flex items-center justify-center border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center justify-center w-full px-4 py-2 mt-2 text-sm text-center transition-all border rounded-md shadow-sm border-slate-300 hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"
-                onClick={() => (window.location.href = "/add-coaches")}
+                onClick={() => navigate("/add-coaches")}
               >
-                <span className="h-5 w-5 mr-2">🤖</span> {/* Robot Emoji */}
+                <span className="w-5 h-5 mr-2">🤖</span>
                 Add Coaches
               </button>
             </div>
             <div>
               <p className="pt-3 text-xs uppercase text-slate-500">View Tool</p>
               <button
-                className="mt-3 w-full rounded-md flex items-center justify-center border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center justify-center w-full px-4 py-2 mt-3 text-sm text-center transition-all border rounded-md shadow-sm border-slate-300 hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"
-                onClick={() => (window.location.href = "/view-startups")}
+                onClick={() => navigate("/view-startups")}
               >
-                <span className="h-5 w-5 mr-2">🌍</span> {/* Earth Emoji */}
+                <span className="w-5 h-5 mr-2">🌍</span>
                 View Startups
               </button>
 
               <button
-                className="mt-3 w-full rounded-md flex items-center justify-center border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                className="flex items-center justify-center w-full px-4 py-2 mt-3 text-sm text-center transition-all border rounded-md shadow-sm border-slate-300 hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                 type="button"
-                onClick={() => (window.location.href = "/view-coaches")}
+                onClick={() => navigate("/view-coaches")}
               >
-                <span className="h-5 w-5 mr-2">🐱</span> {/* Cat Emoji */}
+                <span className="w-5 h-5 mr-2">🐱</span>
                 View Coaches
               </button>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 p-4 text-blue-gray-500 mt-2">
-            <p className="pt-3 text-xs uppercase text-slate-500 mt-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-4 mt-2 text-blue-gray-500">
+            <p className="pt-3 mt-2 text-xs uppercase text-slate-500">
               Main Func tool
             </p>
             <button
-              className="w-full rounded-md flex items-center justify-center border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+              className="flex items-center justify-center w-full px-4 py-2 text-sm text-center transition-all border rounded-md shadow-sm border-slate-300 hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
               type="button"
-              onClick={() => (window.location.href = "/start-matching")}
+              onClick={() => navigate("/start-matching")}
             >
-              <span className="h-5 w-5 mr-2">🌚</span> {/* New Moon Emoji */}
+              <span className="w-5 h-5 mr-2">🌚</span>
               Start Matching
             </button>
           </div>
         </div>
       </div>
-      {/* Modal Code End */}
     </div>
   );
 }

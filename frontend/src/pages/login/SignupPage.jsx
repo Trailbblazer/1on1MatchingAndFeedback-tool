@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
 import { GoogleLogin } from '@react-oauth/google';
 
+
 const SignupPage = ({ onLogin }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ const SignupPage = ({ onLogin }) => {
       picture: payload.picture,
     };
     if (onLogin) onLogin(userData);
-    navigate('/dashboard');
+    navigate('/Home');
   };
 
   const handleGoogleError = () => {
@@ -48,7 +49,7 @@ const SignupPage = ({ onLogin }) => {
       setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        navigate('/dashboard');
+        navigate('/Home');
       }, 1500);
     }
   };

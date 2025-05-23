@@ -89,7 +89,7 @@ function App() {
             />
 
             {/* Redirect to login by default */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+           
           </Routes>
         </Router>
       </GoogleOAuthProvider>

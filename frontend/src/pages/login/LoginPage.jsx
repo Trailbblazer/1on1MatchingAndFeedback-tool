@@ -1,215 +1,233 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-
-
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = React.useState({});
+  const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      setIsLoading(true);
-      // Simulate API login call
-      setTimeout(() => {
-        setIsLoading(false);
-        // Optionally call onLogin handler
-        if (onLogin) {
-          onLogin({ email });
-        }
-        navigate('/dashboard');
-      }, 1500);
-    }
-  };
+  const handleGoogleError = (error) => {
+  console.error('Google Login Error:', error);
+  setErrors({ google: 'Google login failed. Please try again.' });
+};
 
   const handleGoogleSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
+    setIsLoading(true);
+    setErrors({});
 
-    console.log('Google Login Success:', decoded);
-    const userData = {
-      name: decoded.name,
-      email: decoded.email,
-      picture: decoded.picture,
-    };
-    if (onLogin) onLogin(userData);
-    navigate('/pages/Home');
-  };
+    
+    
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      console.log('Google Login Success:', decoded);
 
-  const handleGoogleError = () => {
-    console.log('Google Login Failed');
-    setErrors({ google: 'Google login failed. Please try again.' });
+      if (onLogin) {
+        onLogin({
+          name: decoded.name,
+          email: decoded.email,
+          picture: decoded.picture,
+        });
+      }
+
+      navigate('/');
+    } catch (error) {
+      console.error('Google Login Error:', error);
+      setErrors({ google: 'Failed to process Google login. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="flex w-full max-w-5xl overflow-hidden bg-white shadow-lg rounded-xl">
-
-        {/* Left Welcome Section */}
-        <div className="flex flex-col justify-center w-1/2 p-12 text-white bg-gradient-to-br from-blue-600 to-purple-600">
-          <h1 className="mb-6 text-4xl font-bold">Welcome to Platform</h1>
-          <p className="mb-8 text-lg">
-            Join our community and get access to exclusive features. Create your account and start your journey today.
-          </p>
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-12 h-12 mr-4 bg-white rounded-full bg-opacity-20">
-              <span className="text-2xl">A</span>
+    <>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div 
+          className="w-full max-w-md"
+          style={{
+            animation: 'fadeIn 0.6s ease-out forwards'
+          }}
+        >
+          {/* Logo and Header */}
+          <div className="text-center mb-8">
+            <div
+              className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl mb-6 shadow-lg"
+              style={{
+                animation: 'scaleIn 0.5s ease-out 0.2s forwards',
+                transform: 'scale(0.8)',
+                opacity: '0'
+              }}
+            >
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
             </div>
-            <div>
-              <p className="font-medium">Admin Dashboard</p>
-              <p className="text-sm opacity-80">Access all features</p>
+            
+            <h1 
+              className="text-3xl font-bold text-gray-900 mb-2"
+              style={{
+                animation: 'slideUp 0.5s ease-out 0.3s forwards',
+                opacity: '0',
+                transform: 'translateY(10px)'
+              }}
+            >
+              Welcome to <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Sampo</span>
+            </h1>
+            
+            <p 
+              className="text-gray-600 text-lg"
+              style={{
+                animation: 'slideUp 0.5s ease-out 0.4s forwards',
+                opacity: '0',
+                transform: 'translateY(10px)'
+              }}
+            >
+              Accelerate your growth with expert coaching
+            </p>
+          </div>
+
+          {/* Login Card */}
+          <div 
+            className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8"
+            style={{
+              animation: 'slideUp 0.6s ease-out 0.5s forwards',
+              opacity: '0',
+              transform: 'translateY(20px)'
+            }}
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sign in to your account</h2>
+              <p className="text-gray-600">Get matched with your perfect coach today</p>
             </div>
-          </div>
-        </div>
 
-        {/* Right Login Form Section */}
-        <div className="w-1/2 p-12">
-          <div className="mb-10 text-center">
-            <h2 className="mb-2 text-3xl font-bold text-gray-800">USER LOGIN</h2>
-            <p className="text-gray-600">Enter your credentials to access your account</p>
-          </div>
-
-          {/* Google Login */}
-          <div className="mb-6">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              useOneTap
-              text="continue_with"
-              shape="rectangular"
-              size="large"
-              width="100%"
-            />
-            {errors.google && <p className="mt-2 text-sm text-red-500">{errors.google}</p>}
-          </div>
-
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-500 bg-white">Or login with email</span>
-            </div>
-          </div>
-
-          {/* Email/Password Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Email Field */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <FiMail className="text-gray-400" />
+            {/* Google Login Button - Now using the actual Google component */}
+            <div className="mb-6" style={{transform: 'scale(1.2)', marginLeft: '30px', transformOrigin: 'top center', display: 'inline-block'}}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                useOneTap
+                text="continue_with"
+                shape="pill"
+                size="large"
+                width= '300'
+                height= '100'
+                
+              />
+              
+              {isLoading && (
+                <div className="mt-4 text-center">
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
                 </div>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                />
-              </div>
-              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <FiLock className="text-gray-400" />
+              )}
+              
+              {errors.google && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 text-center flex items-center justify-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {errors.google}
+                  </p>
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-10 pr-10 py-3 border ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-blue-600"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
+              )}
+            </div>
+
+            {/* Features */}
+            <div 
+              className="space-y-4 mb-6"
+              style={{
+                animation: 'slideUp 0.5s ease-out 0.7s forwards',
+                opacity: '0',
+                transform: 'translateY(10px)'
+              }}
+            >
+              <div className="flex items-center text-sm text-gray-600">
+                <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                Expert matching algorithm
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-700">
-                  Remember
-                </label>
+              
+              <div className="flex items-center text-sm text-gray-600">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                Secure and private
               </div>
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </Link>
+              
+              <div className="flex items-center text-sm text-gray-600">
+                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                Get started in minutes
+              </div>
             </div>
 
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition duration-200 bg-blue-600 rounded-lg shadow hover:bg-blue-700 focus:outline-none"
-              >
-                {isLoading ? 'Logging in...' : <>LOGIN <FiArrowRight className="ml-2" /></>}
-              </button>
+            {/* Footer */}
+            <div 
+              className="text-center"
+              style={{
+                animation: 'slideUp 0.5s ease-out 0.8s forwards',
+                opacity: '0',
+                transform: 'translateY(10px)'
+              }}
+            >
+              <p className="text-xs text-gray-500 leading-relaxed">
+                By signing in, you agree to our{' '}
+                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline transition-colors">
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline transition-colors">
+                  Privacy Policy
+                </a>
+              </p>
             </div>
-          </form>
-
-          {/* Signup Link */}
-          <div className="mt-6 text-sm text-center text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign up
-            </Link>
           </div>
 
+          {/* Bottom CTA */}
+          <div 
+            className="text-center mt-8"
+            style={{
+              animation: 'slideUp 0.5s ease-out 0.9s forwards',
+              opacity: '0',
+              transform: 'translateY(10px)'
+            }}
+          >
+            <p className="text-gray-600">
+              New to Sampo?{' '}
+              <a href="#" className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition-colors">
+                Learn more about our coaching platform
+              </a>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
