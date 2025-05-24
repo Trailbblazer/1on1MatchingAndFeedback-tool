@@ -7,6 +7,7 @@ const LoginPage = ({ onLogin }) => {
   const [errors, setErrors] = React.useState({});
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  
 
   const handleGoogleError = (error) => {
   console.error('Google Login Error:', error);
@@ -59,7 +60,7 @@ const LoginPage = ({ onLogin }) => {
         }
       `}</style>
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div 
           className="w-full max-w-md"
           style={{
@@ -67,9 +68,9 @@ const LoginPage = ({ onLogin }) => {
           }}
         >
           {/* Logo and Header */}
-          <div className="text-center mb-8">
+          <div className="mb-8 text-center">
             <div
-              className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl mb-6 shadow-lg"
+              className="inline-flex items-center justify-center w-16 h-16 mb-6 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl"
               style={{
                 animation: 'scaleIn 0.5s ease-out 0.2s forwards',
                 transform: 'scale(0.8)',
@@ -82,18 +83,18 @@ const LoginPage = ({ onLogin }) => {
             </div>
             
             <h1 
-              className="text-3xl font-bold text-gray-900 mb-2"
+              className="mb-2 text-3xl font-bold text-gray-900"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.3s forwards',
                 opacity: '0',
                 transform: 'translateY(10px)'
               }}
             >
-              Welcome to <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Sampo</span>
+              Welcome to <span className="text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text">Sampo</span>
             </h1>
             
             <p 
-              className="text-gray-600 text-lg"
+              className="text-lg text-gray-600"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.4s forwards',
                 opacity: '0',
@@ -106,15 +107,15 @@ const LoginPage = ({ onLogin }) => {
 
           {/* Login Card */}
           <div 
-            className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8"
+            className="p-8 bg-white border border-gray-100 shadow-xl rounded-3xl"
             style={{
               animation: 'slideUp 0.6s ease-out 0.5s forwards',
               opacity: '0',
               transform: 'translateY(20px)'
             }}
           >
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sign in to your account</h2>
+            <div className="mb-8 text-center">
+              <h2 className="mb-2 text-2xl font-semibold text-gray-900">Sign in to your account</h2>
               <p className="text-gray-600">Get matched with your perfect coach today</p>
             </div>
 
@@ -134,13 +135,13 @@ const LoginPage = ({ onLogin }) => {
               
               {isLoading && (
                 <div className="mt-4 text-center">
-                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                  <div className="inline-block w-5 h-5 border-b-2 border-gray-600 rounded-full animate-spin"></div>
                 </div>
               )}
               
               {errors.google && (
-                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600 text-center flex items-center justify-center">
+                <div className="p-3 mt-3 border border-red-200 rounded-lg bg-red-50">
+                  <p className="flex items-center justify-center text-sm text-center text-red-600">
                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
@@ -152,7 +153,7 @@ const LoginPage = ({ onLogin }) => {
 
             {/* Features */}
             <div 
-              className="space-y-4 mb-6"
+              className="mb-6 space-y-4"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.7s forwards',
                 opacity: '0',
@@ -160,7 +161,7 @@ const LoginPage = ({ onLogin }) => {
               }}
             >
               <div className="flex items-center text-sm text-gray-600">
-                <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                <div className="flex items-center justify-center w-5 h-5 mr-3 bg-green-100 rounded-full">
                   <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -169,7 +170,7 @@ const LoginPage = ({ onLogin }) => {
               </div>
               
               <div className="flex items-center text-sm text-gray-600">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <div className="flex items-center justify-center w-5 h-5 mr-3 bg-blue-100 rounded-full">
                   <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
@@ -178,7 +179,7 @@ const LoginPage = ({ onLogin }) => {
               </div>
               
               <div className="flex items-center text-sm text-gray-600">
-                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <div className="flex items-center justify-center w-5 h-5 mr-3 bg-purple-100 rounded-full">
                   <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -186,6 +187,9 @@ const LoginPage = ({ onLogin }) => {
                 Get started in minutes
               </div>
             </div>
+    
+
+
 
             {/* Footer */}
             <div 
@@ -196,22 +200,23 @@ const LoginPage = ({ onLogin }) => {
                 transform: 'translateY(10px)'
               }}
             >
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs leading-relaxed text-gray-500">
                 By signing in, you agree to our{' '}
-                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline transition-colors">
+                <a href="#" className="font-medium text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline transition-colors">
+                <a href="#" className="font-medium text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
                   Privacy Policy
                 </a>
               </p>
             </div>
           </div>
+          
 
           {/* Bottom CTA */}
           <div 
-            className="text-center mt-8"
+            className="mt-8 text-center"
             style={{
               animation: 'slideUp 0.5s ease-out 0.9s forwards',
               opacity: '0',
@@ -220,11 +225,30 @@ const LoginPage = ({ onLogin }) => {
           >
             <p className="text-gray-600">
               New to Sampo?{' '}
-              <a href="#" className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline transition-colors">
+              <a href="#" className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
                 Learn more about our coaching platform
               </a>
             </p>
           </div>
+
+         <div 
+  className="mt-6 text-center"
+  style={{
+    animation: 'slideUp 0.5s ease-out 1s forwards',
+    opacity: '0',
+    transform: 'translateY(10px)'
+  }}
+>
+  <p className="text-gray-600">
+    Are you an admin?{' '}
+    <button
+      onClick={() => navigate('/SignupPage')}
+      className="font-semibold text-purple-600 transition-colors hover:text-purple-700 hover:underline"
+    >
+      Go to Admin Login
+    </button>
+  </p>
+</div>
         </div>
       </div>
     </>

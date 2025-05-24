@@ -11,6 +11,7 @@ import LoginPage from "./pages/login/LoginPage";
 import { StrictMode } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+
 function App() {
   const CLINET_ID = "884933282507-roa52cm6ntvi89mebusvv13hppgu0l5p.apps.googleusercontent.com";
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,7 +37,7 @@ function App() {
               path="/login"
               element={<LoginPage onLogin={handleLogin} />}
             />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/SignupPage" element={<SignupPage />} />
 
             {/* Protected routes */}
             <Route
@@ -47,6 +48,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+       
             <Route
               path="/add-startup"
               element={
