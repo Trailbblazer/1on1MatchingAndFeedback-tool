@@ -37,7 +37,7 @@ function App() {
               path="/login"
               element={<LoginPage onLogin={handleLogin} />}
             />
-            <Route path="/SignupPage" element={<SignupPage />} />
+            <Route path="/SignupPage"  element={<SignupPage onLogin={handleLogin} />} />
 
             {/* Protected routes */}
             <Route
