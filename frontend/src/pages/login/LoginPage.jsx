@@ -1,5 +1,5 @@
 import React from 'react';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,32 +7,28 @@ const LoginPage = ({ onLogin }) => {
   const [errors, setErrors] = React.useState({});
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
-  
 
   const handleGoogleError = (error) => {
-  console.error('Google Login Error:', error);
-  setErrors({ google: 'Google login failed. Please try again.' });
-};
+    console.error('Google Login Error:', error);
+    setErrors({ google: 'Google login failed. Please try again.' });
+  };
 
   const handleGoogleSuccess = (credentialResponse) => {
     setIsLoading(true);
     setErrors({});
-
-    
-    
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       console.log('Google Login Success:', decoded);
 
       if (onLogin) {
-        onLogin({
+        onLogin('user', {
           name: decoded.name,
           email: decoded.email,
           picture: decoded.picture,
         });
       }
 
-      navigate('/');
+      navigate('/user-dashboard');
     } catch (error) {
       console.error('Google Login Error:', error);
       setErrors({ google: 'Failed to process Google login. Please try again.' });
@@ -42,30 +38,26 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <>
+    <GoogleOAuthProvider clientId="884933282507-roa52cm6ntvi89mebusvv13hppgu0l5p.apps.googleusercontent.com">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        
         @keyframes scaleIn {
           from { opacity: 0; transform: scale(0.8); }
           to { opacity: 1; transform: scale(1); }
         }
-        
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-      
+
       <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div 
+        <div
           className="w-full max-w-md"
-          style={{
-            animation: 'fadeIn 0.6s ease-out forwards'
-          }}
+          style={{ animation: 'fadeIn 0.6s ease-out forwards' }}
         >
           {/* Logo and Header */}
           <div className="mb-8 text-center">
@@ -81,8 +73,7 @@ const LoginPage = ({ onLogin }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            
-            <h1 
+            <h1
               className="mb-2 text-3xl font-bold text-gray-900"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.3s forwards',
@@ -92,8 +83,7 @@ const LoginPage = ({ onLogin }) => {
             >
               Welcome to <span className="text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text">Sampo</span>
             </h1>
-            
-            <p 
+            <p
               className="text-lg text-gray-600"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.4s forwards',
@@ -106,7 +96,7 @@ const LoginPage = ({ onLogin }) => {
           </div>
 
           {/* Login Card */}
-          <div 
+          <div
             className="p-8 bg-white border border-gray-100 shadow-xl rounded-3xl"
             style={{
               animation: 'slideUp 0.6s ease-out 0.5s forwards',
@@ -119,8 +109,8 @@ const LoginPage = ({ onLogin }) => {
               <p className="text-gray-600">Get matched with your perfect coach today</p>
             </div>
 
-            {/* Google Login Button - Now using the actual Google component */}
-            <div className="mb-6" style={{transform: 'scale(1.2)', marginLeft: '30px', transformOrigin: 'top center', display: 'inline-block'}}>
+            {/* Google Login Button */}
+            <div className="mb-6 text-center">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
@@ -128,17 +118,13 @@ const LoginPage = ({ onLogin }) => {
                 text="continue_with"
                 shape="pill"
                 size="large"
-                width= '300'
-                height= '100'
-                
+                width="300"
               />
-              
               {isLoading && (
                 <div className="mt-4 text-center">
                   <div className="inline-block w-5 h-5 border-b-2 border-gray-600 rounded-full animate-spin"></div>
                 </div>
               )}
-              
               {errors.google && (
                 <div className="p-3 mt-3 border border-red-200 rounded-lg bg-red-50">
                   <p className="flex items-center justify-center text-sm text-center text-red-600">
@@ -152,7 +138,7 @@ const LoginPage = ({ onLogin }) => {
             </div>
 
             {/* Features */}
-            <div 
+            <div
               className="mb-6 space-y-4"
               style={{
                 animation: 'slideUp 0.5s ease-out 0.7s forwards',
@@ -168,7 +154,6 @@ const LoginPage = ({ onLogin }) => {
                 </div>
                 Expert matching algorithm
               </div>
-              
               <div className="flex items-center text-sm text-gray-600">
                 <div className="flex items-center justify-center w-5 h-5 mr-3 bg-blue-100 rounded-full">
                   <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -177,7 +162,6 @@ const LoginPage = ({ onLogin }) => {
                 </div>
                 Secure and private
               </div>
-              
               <div className="flex items-center text-sm text-gray-600">
                 <div className="flex items-center justify-center w-5 h-5 mr-3 bg-purple-100 rounded-full">
                   <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
@@ -187,71 +171,45 @@ const LoginPage = ({ onLogin }) => {
                 Get started in minutes
               </div>
             </div>
-    
-
-
 
             {/* Footer */}
-            <div 
-              className="text-center"
-              style={{
-                animation: 'slideUp 0.5s ease-out 0.8s forwards',
-                opacity: '0',
-                transform: 'translateY(10px)'
-              }}
-            >
+            <div className="text-center">
               <p className="text-xs leading-relaxed text-gray-500">
                 By signing in, you agree to our{' '}
-                <a href="#" className="font-medium text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="font-medium text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
                   Privacy Policy
                 </a>
               </p>
             </div>
           </div>
-          
 
           {/* Bottom CTA */}
-          <div 
-            className="mt-8 text-center"
-            style={{
-              animation: 'slideUp 0.5s ease-out 0.9s forwards',
-              opacity: '0',
-              transform: 'translateY(10px)'
-            }}
-          >
+          <div className="mt-8 text-center">
             <p className="text-gray-600">
               New to Sampo?{' '}
-              <a href="#" className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+              <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
                 Learn more about our coaching platform
               </a>
             </p>
           </div>
-
-         <div 
-  className="mt-6 text-center"
-  style={{
-    animation: 'slideUp 0.5s ease-out 1s forwards',
-    opacity: '0',
-    transform: 'translateY(10px)'
-  }}
->
-  <p className="text-gray-600">
-    Are you an admin?{' '}
-    <button
-      onClick={() => navigate('/SignupPage')}
-      className="font-semibold text-purple-600 transition-colors hover:text-purple-700 hover:underline"
-    >
-      Go to Admin Login
-    </button>
-  </p>
-</div>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Are you an admin?{' '}
+              <button
+                onClick={() => navigate('/SignupPage')}
+                className="font-semibold text-purple-600 hover:text-purple-700 hover:underline"
+              >
+                Go to Admin Login
+              </button>
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </GoogleOAuthProvider>
   );
 };
 

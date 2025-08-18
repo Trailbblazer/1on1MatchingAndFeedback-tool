@@ -19,8 +19,7 @@ const SignupPage = ({ onLogin }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!name) newErrors.name = 'Name is required';
-    if (!username) newErrors.username = 'username is required';
-
+    if (!username) newErrors.username = 'Username is required';
     if (!password) newErrors.password = 'Password is required';
     else if (password.length < 2) newErrors.password = 'Password must be at least 3 characters';
     if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
@@ -31,13 +30,18 @@ const SignupPage = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    if(username === "admin" && password === "admin" && confirmPassword === "admin" ) {
-      onLogin();
+    
+    setIsLoading(true);
+    
+    if(username === "admin" && password === "admin" && confirmPassword === "admin") {
+      // Pass admin role to parent component
+      onLogin('admin', { name, username, role: 'admin' });
       navigate('/');
-    }
-    else{
+    } else {
       alert("Invalid username or password");
     }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -164,11 +168,28 @@ const SignupPage = ({ onLogin }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center justify-center w-full py-3 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="flex items-center justify-center w-full py-3 text-white transition duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {isLoading ? 'Creating account...' : <>LOGIN <FiArrowRight className="ml-2" /></>}
+                {isLoading ? 'Logging in...' : (
+                  <>
+                    LOGIN <FiArrowRight className="ml-2" />
+                  </>
+                )}
               </button>
             </form>
+
+            {/* Back to user login */}
+            <div className="text-center">
+              <p className="text-gray-600">
+                Not an admin?{' '}
+                <button
+                  onClick={() => navigate('/login')}
+                  className="font-semibold text-indigo-600 transition-colors hover:text-indigo-700 hover:underline"
+                >
+                  Go to User Login
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>

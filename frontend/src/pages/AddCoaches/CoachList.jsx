@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import { getCoaches } from '../../api/coachApi';
 
 const CoachList = () => {
@@ -28,11 +27,14 @@ const CoachList = () => {
   return (
     <div className="coach-list">
       <h2>Coaches</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {coaches.map(coach => (
-          <CoachCard key={coach.CoachId} coach={coach} />
+
+      <ul>
+        {coaches.map((coach) => (
+          <li key={coach.CoachId}>
+            <strong>{coach.name}</strong> - {coach.email} ({coach.speciality})
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };
