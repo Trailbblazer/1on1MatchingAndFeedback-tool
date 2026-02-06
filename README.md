@@ -74,7 +74,6 @@ npm start
   ```
   Compiled successfully!
   Local: http://localhost:3000
-  
   ```
 - Click the link to open in your browser.
 
