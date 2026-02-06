@@ -9,11 +9,14 @@ The **1on1MatchingAndFeedbackTool** is a project designed to match startups and 
 
 ### Step 1: Clone the repository and navigate into the project directory
 
+**In GitLab:**
 ```bash
-git clone https://gitlab.com/SampoAccelerator/1on1MatchingAndFeedback-tool.git
+git clone https://gitlab.com/SampoAccelerator/1on1MatchingAndFeedback-tool.git 
 ```
+
+**In GitHub (Current Version):**
 ```bash
-(In GitHub: (link))
+git clone https://github.com/Trailbblazer/1on1MatchingAndFeedback-tool.git
 ```
 
 ```bash
