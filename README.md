@@ -5,57 +5,52 @@ The **1on1MatchingAndFeedbackTool** is a project designed to match startups and 
 
 ---
 
-## Backend Setup
+## Backend Setup (Flask + SQLAlchemy)
 
-### Step 1: Install Dependencies
+### Step 1: Clone the repository and navigate into the project directory
 
-Follow these steps to clone this repository and run the project locally:
-
-bash
-Copy
-Edit
-# Clone the repository
+```bash
 git clone https://gitlab.com/SampoAccelerator/1on1MatchingAndFeedback-tool.git
+```
+```bash
+(In GitHub: (link))
+```
 
-# Navigate into the project directory
+```bash
 cd your-repository-name
+```
+(Current case: cd 1on1MatchingAndFeedback-tool/backend)
 
-# (Optional) Create a virtual environment
+### Step 2: (Optional) Create a virtual environment
+```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
 
-# Install dependencies (if any requirements.txt is provided)
+### Step 3: Install python dependencies (if any requirements.txt is provided)
+```bash
 pip install -r requirements.txt
+```
 
-# Run your Python file
-python main.py
-
-### Step 2: Setup SQLite JDBC Driver
-- Ensure the SQLite JDBC driver (version 3.45.1) is installed.
-- If using PyCharm:
-  1. Go to `File > Settings > Project: <Project Name> > Python Interpreter`.
-  2. Add the SQLite JDBC driver if missing.
-  3. Test the database connection.
-
-### Step 3: Start the Backend Server
+### Step 4: Start the Backend Server
 ```bash
 python backend/app.py
 ```
 
-- You should see the following output:
-  ```
+- If successful, you will see::
+  ```[BackendDocs.md](BackendDocs.md)
   Running on http://127.0.0.1:5000
   ```
 
 ### Notes:
 - If your IDE does not recognize the `1on1MatchingAndFeedbackTool` folder, mark it as **Source Root**.
-- If `backend/database/__init__.py` or `backend/app.py` causes "Unresolved reference" or "No module named 'backend'" inside those files, run `app.py` anyway. When the server starts, the error will be gone.
-- The `app.py` file also initializes the database. When the backend server runs for the first time, it creates the necessary tables in the `sauna.db` file automatically using the following code:
+- If you see `backend/database/__init__.py` or `backend/app.py` causes "Unresolved reference" or "No module named 'backend'" just run `app.py`, the server will start.
+- On first run, the backend automatically creates the SQLite database instance/sauna.db using:
   ```python
   with app.app_context():
       db.create_all()
   ```
-  This ensures that your database schema matches the defined models.
+  This ensures the database schema matches the SQLAlchemy models.
 
 ---
 
@@ -63,7 +58,7 @@ python backend/app.py
 
 ### Step 1: Install Dependencies
 ```bash
-cd Sauna-Trainee/1on1MatchingAndFeedbackTool/frontend
+cd ../frontend
 npm install
 ```
 
@@ -75,11 +70,25 @@ npm start
 - You should see the following output:
   ```
   Compiled successfully!
-
-  You can now view frontend in the browser.
-
-    Local:            http://localhost:3000
+  Local: http://localhost:3000
+  
   ```
-- Click the link to open the frontend in your browser.
+- Click the link to open in your browser.
+
+---
+
+##  Environment Variables
+
+### Backend
+The backend uses SQLite by default:
+```
+SQLALCHEMY_DATABASE_URI=sqlite:///instance/sauna.db
+```
+
+### Frontend
+Create a `.env` file inside `/frontend`:
+```
+REACT_APP_BACKEND_URL=http://127.0.0.1:5000
+```
 
 ---

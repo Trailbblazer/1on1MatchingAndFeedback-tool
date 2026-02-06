@@ -19,7 +19,9 @@
 
 ## Overview
 
-This project is designed (to simulate) and manage a matching process between coaches and startups. The primary goal is to assign startups to coaches based on availability, feedback, and specific constraints. The system ensures that:
+This module simulates and manages the matching process between coaches and startups. It is used for testing and validating the matching logic and operates entirely on JSON files.
+This simulation engine is separate from the production Flask + SQLAlchemy backend and is located in backend/dataGen/.
+The system ensures that:
 
 - **Startups do not meet the same coach more than once per round (day).**
 - **Coaches' preferences and feedback influence future matching.**
@@ -37,6 +39,8 @@ The project comprises several Python scripts and JSON data files that work toget
 ---
 
 ## Workflow Summary
+
+These scripts are used for simulation and testing only. They are not connected to the production backend or frontend.
 
 All files except `algo.py` are in `backend/dataGen` folder
 
@@ -63,6 +67,8 @@ All files except `algo.py` are in `backend/dataGen` folder
 ---
 
 ## Detailed Documentation
+
+**Note**: These scripts are part of the simulation/testing system located in backend/dataGen. They are not used by the production Flask backend or frontend.
 
 ### 1. `genCoachTime.py`
 
@@ -154,6 +160,8 @@ All files except `algo.py` are in `backend/dataGen` folder
 
 **Purpose**: Implements the main matching algorithm to assign startups to coaches based on availability, feedback, and specific constraints.
 
+The matching priority is based on the mentor-defined scoring rules described in the “Matching Algorithm Description” wiki page.
+
 **Functionality**:
 
 - **Data Loading**:
@@ -220,7 +228,7 @@ All files except `algo.py` are in `backend/dataGen` folder
 ```
 
 - **Testing the Algorithm**:
-    - Two test datasets are provided in `1on1MatchingAndFeedbackTool/backend/testDatasets/testSet1` and `1on1MatchingAndFeedbackTool/backend/testDatasets/testSet2`.
+    - Two test datasets are provided in `1on1MatchingAndFeedback-Tool/backend/testDatasets/testSet1` and `1on1MatchingAndFeedback-Tool/backend/testDatasets/testSet2`.
     - To verify the algorithm:
       1. Copy values from `test_coachTimeWithBreaks.json` into `coachTimeWithBreaks.json`, `test_startups.json` into `startups.json`, and `test_total_feedbacks.json` into `total_feedbacks.json`.
       2. Run `algo.py`.
@@ -291,7 +299,7 @@ This file is used for development and testing purposes. In production startups a
     - Randomly decides whether to provide text feedback. Text feedback is optional. For admin only. Does not affect the matching algorithm.
 
 - **Shadow Ban Mechanism**:
-    - If a startup fails to provide feedback (`Startup_grade` is `null`), they are flagged for shadow-banning in the next matching round.
+    - If a startup fails to provide feedback (`Startup_grade` is `null`), that startup is shadow‑banned for the next matching round.
     - Coaches are not shadow-banned for not leaving feedback. Only startups are.
 - **Data Updating**:
     - Merges daily feedback into `total_feedbacks.json`.
@@ -442,7 +450,7 @@ After
     - After meetings, both coaches and startups provide feedback.
     - Feedback affects future matching:
         - Negative feedback from coaches prevents future pairings with startups that received this feedback.
-        - Lack of feedback from startups results in shadow banning for the coaches that startups didn't give feedback to.
+        - “Lack of feedback from startups results in shadow‑banning for those startups in the next matching round.
 
 4. **Shadow Ban Mechanism**:
     - Startups that do not provide feedback are temporarily shadow-banned.
@@ -477,8 +485,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Authors
 
-This version of the project was done by:
+his project has been developed and maintained by multiple contributors across different internship cycles:
 
-- [Andrii Deshko](https://github.com/LVNDLORD)
-- [Artur Golavskiy](https://github.com/arturgola)
-
+- [Andrii Deshko](https://github.com/LVNDLORD) - Original documentation contributor and implementation testing
+- [Artur Golavskiy](https://github.com/arturgola) - Original documentation contributor and implementation testing
+- Bidhan Adhikari - Intern contributor who updated and refined the Remastered Algorithm documentation
+- Kamonnun Silarat - Current intern (2026), responsible for updated documentation, wiki restructuring, and ongoing development
