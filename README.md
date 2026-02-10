@@ -16,7 +16,7 @@ git clone https://gitlab.com/SampoAccelerator/1on1MatchingAndFeedback-tool.git
 
 **In GitHub (Current Version - Still using personal username):**
 ```bash
-git clone https://github.com/Trailbblazer/1on1MatchingAndFeedback-tool.git
+git clone https://github.com/1on1matchingtool-team/1on1MatchingAndFeedback-tool.git
 ```
 
 ```bash
