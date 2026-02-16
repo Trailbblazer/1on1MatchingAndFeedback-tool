@@ -1,6 +1,9 @@
 .venv
 .idea
 
+backend/venv/
+venv/
+
 # Logs
 logs
 *.log
