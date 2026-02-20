@@ -4,3 +4,5 @@ from .coach_slots_routes import *
 from .coach_assignments_routes import *
 from .daily_feedback_routes import *
 from .feedback_history_routes import *
+from .coach_routes import *
+from .startup_routes import *

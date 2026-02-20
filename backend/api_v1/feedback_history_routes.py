@@ -1,7 +1,9 @@
 from flask import request, jsonify
 from backend.database.base import db
 from backend.database import FeedbackHistory
+from backend.validation.feedback_history_validation import validate_feedback_history
 from .routes import api_v1, row_to_dict, parse_date
+
 @api_v1.route("/feedback_history", methods=["GET"])
 def get_feedback_history():
     try:
@@ -23,6 +25,7 @@ def get_feedback_history_by_id(id):
 @api_v1.route("/feedback_history", methods=["POST"])
 def add_feedback_history():
     data = request.json or {}
+    validate_feedback_history(data)
     try:
         new_row = FeedbackHistory(
             StartupName=data.get("StartupName"),
@@ -52,6 +55,10 @@ def update_feedback_history(id):
             return jsonify({"error": "Not found"}), 404
 
         data = request.json or {}
+        existing = row_to_dict(row)
+        merged = {**existing, **data}
+        validate_feedback_history(merged)
+
         for key, value in data.items():
             if key in ("DateFeedbackOriginal", "DateUpdatedStartupGrade"):
                 value = parse_date(value)

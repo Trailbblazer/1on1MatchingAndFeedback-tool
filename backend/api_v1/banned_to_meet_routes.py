@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from backend.database.base import db
 from backend.database import BannedToMeet
+from backend.validation.banned_validation import validate_banned_to_meet
 from .routes import api_v1, row_to_dict, parse_date
 
 @api_v1.route("/banned_to_meet", methods=["GET"])
@@ -24,6 +25,7 @@ def get_banned_to_meet_by_id(id):
 @api_v1.route("/banned_to_meet", methods=["POST"])
 def add_banned_to_meet():
     data = request.json or {}
+    validate_banned_to_meet(data)
     try:
         new_row = BannedToMeet(
             StartupId=data.get("StartupId"),
@@ -47,6 +49,10 @@ def update_banned_to_meet(id):
             return jsonify({"error": "Not found"}), 404
 
         data = request.json or {}
+        existing = row_to_dict(row)
+        merged = {**existing, **data}
+        validate_banned_to_meet(merged)
+
         for key, value in data.items():
             if key in ("DateFrom", "DateTo"):
                 value = parse_date(value)

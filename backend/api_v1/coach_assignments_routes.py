@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from backend.database.base import db
 from backend.database import CoachAssignments
+from backend.validation.coach_assignment_validation import validate_coach_assignment
 from .routes import api_v1, row_to_dict, parse_date
 
 @api_v1.route("/coach_assignments", methods=["GET"])
@@ -24,6 +25,7 @@ def get_coach_assignment_by_id(id):
 @api_v1.route("/coach_assignments", methods=["POST"])
 def add_coach_assignment():
     data = request.json or {}
+    validate_coach_assignment(data)
     try:
         new_row = CoachAssignments(
             StartupName=data.get("StartupName"),
@@ -49,6 +51,11 @@ def update_coach_assignment(id):
             return jsonify({"error": "Not found"}), 404
 
         data = request.json or {}
+
+        existing = row_to_dict(row)
+        merged = {**existing, **data}
+        validate_coach_assignment(merged)
+
         for key, value in data.items():
             if key == "Date":
                 value = parse_date(value)

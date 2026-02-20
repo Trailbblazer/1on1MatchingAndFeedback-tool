@@ -1,8 +1,12 @@
 .venv
 .idea
 
+#-----
 backend/venv/
 venv/
+__pycache__/
+*.pyc
+#-----
 
 # Logs
 logs
