@@ -7,7 +7,7 @@ class CoachSlots(db.Model):
     Slot = db.Column(db.String(50), nullable=False)
     Duration = db.Column(db.Integer, nullable=False)
     Date = db.Column(db.Date, nullable=False)
-    IsBreak = db.Column(db.Boolean, nullable=False)
+    IsBreak = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relationship to Coaches
     coach = db.relationship('Coaches', back_populates='slots')

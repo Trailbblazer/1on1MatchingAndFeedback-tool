@@ -55,18 +55,16 @@ def update_feedback_history(id):
             return jsonify({"error": "Not found"}), 404
 
         data = request.json or {}
-        existing = row_to_dict(row)
-        merged = {**existing, **data}
-        validate_feedback_history(merged)
+        validate_feedback_history(data, is_patch=True)
 
         for key, value in data.items():
             if key in ("DateFeedbackOriginal", "DateUpdatedStartupGrade"):
                 value = parse_date(value)
-            if hasattr(row, key):
-                setattr(row, key, value)
+            setattr(row, key, value)
 
         db.session.commit()
         return jsonify({"message": "FeedbackHistory updated"}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 400

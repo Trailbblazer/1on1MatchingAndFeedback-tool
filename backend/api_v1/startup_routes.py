@@ -58,13 +58,10 @@ def patch_startup(id):
     try:
         startup = Startups.query.get(id)
         if not startup:
-            return jsonify({"error": "Startup not found"}), 404
+            return jsonify({"error": "Not found"}), 404
 
         data = request.json or {}
-
-        existing = row_to_dict(startup)
-        merged = {**existing, **data}
-        validate_startup(merged)
+        validate_startup(data, is_patch=True)
 
         for key, value in data.items():
             if hasattr(startup, key):
@@ -88,6 +85,7 @@ def delete_startup(id):
         db.session.delete(startup)
         db.session.commit()
         return jsonify({"message": "Startup deleted"}), 200
+
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error deleting startup: {e}")

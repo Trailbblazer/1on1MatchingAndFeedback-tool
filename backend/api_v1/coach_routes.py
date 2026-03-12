@@ -31,8 +31,16 @@ def add_coach():
         data = request.json or {}
         validate_coach(data)
 
+        title = data.get("Title")
+        first = data.get("FirstName")
+        last = data.get("LastName")
+
+        full_name = " ".join([p for p in [title, first, last] if p])
+
         new_coach = Coaches(
-            CoachName=data.get("CoachName"),
+            Title=title,
+            FirstName=first,
+            LastName=last,
             Email=data.get("Email"),
             Phone=data.get("Phone"),
             Chat=data.get("Chat"),
@@ -63,14 +71,21 @@ def patch_coach(id):
             return jsonify({"error": "Coach not found"}), 404
 
         data = request.json or {}
+        validate_coach(data, is_patch=True)
 
-        existing = row_to_dict(coach)
-        merged = {**existing, **data}
-        validate_coach(merged)
+        allowed_fields = {
+            "Title", "FirstName", "LastName", "Email", "Phone", "Chat",
+            "Bio", "Expertise", "SocialMedia",
+            "CoachingSessions", "BatchesCoached"
+        }
 
         for key, value in data.items():
-            if hasattr(coach, key):
+            if key in allowed_fields:
                 setattr(coach, key, value)
+
+        coach.CoachName = " ".join(
+            p for p in [coach.Title, coach.FirstName, coach.LastName] if p
+        )
 
         db.session.commit()
         return jsonify({"message": "Coach updated"}), 200
@@ -85,7 +100,7 @@ def delete_coach(id):
     try:
         coach = Coaches.query.get(id)
         if not coach:
-            return jsonify({"error": "Coach not found"}), 404
+            return jsonify({"error": "Not found"}), 404
 
         db.session.delete(coach)
         db.session.commit()

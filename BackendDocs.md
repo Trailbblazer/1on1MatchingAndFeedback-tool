@@ -1,4 +1,5 @@
 # Backend Documentation
+#### Updated 12 March 2026
 
 ## Table of Contents
 
@@ -6,29 +7,20 @@
 2. [Folder Structure](#folder-structure)
 3. [Configuration](#configuration)
 4. [Key Files and Components](#key-files-and-components)
-   - [app.py](#1-apppy)
-   - [database/__init__.py](#2-databaseinitpy)
-   - [database/base.py](#3-databasebasepy)
-   - [Models in database/models](#4-models-in-databasemodels)
-   - [Documentation and Schema Files](#5-documentation-and-schema-files)
 5. [API Endpoints](#api-endpoints)
-   - [Root Endpoint](#1-root-endpoint)
-   - [Database Connectivity Check](#2-database-connectivity-check) 
-   - [Add Startup](#3-add-startup) 
-   - [Get Startups](#4-get-startups) 
-   - [Add Coach](#5-add-coach) 
-   - [Get Coaches](#6-get-coaches)
-6. [Database Models](#database-models)
-7. [API v1 (Routing Prototype)](#api-v1-routing-prototype)
-8. [Data Generation Scripts](#data-generation-scripts)
-9. [Environment Variables](#environment-variables)
-10. [Future Enhancements](#future-enhancements)
+6. [Validation Testing](#validation-testing)
+7. [Database Models](#database-models)
+8. [Cascade Delete Behavior](#cascade-delete-behavior)
+9. [API v1 (Routing Prototype)](#api-v1-routing-prototype)
+10. [Data Generation Scripts](#data-generation-scripts)
+11. [Environment Variables](#environment-variables)
+12. [Future Enhancements](#future-enhancements)
 
 ---
 
 ## Overview
 
-The backend of the **1on1MatchingAndFeedbackTool** application is built with Flask and uses Flask-SQLAlchemy for database management. It provides RESTful API endpoints to interact with the database, which stores data for startups, coaches, feedback, and related entities. The backend is connected to an SQLite database named `sauna.db` and supports Cross-Origin Resource Sharing (CORS) for frontend communication.
+The backend of the **1on1MatchingAndFeedbackTool** application is built with Flask and uses Flask‑SQLAlchemy for database management. It now provides full CRUD endpoints for all seven core models, supported by a unified validation layer that enforces strict type checking, JSON shape rules, logical constraints, and consistent error responses. The backend stores data for startups, coaches, scheduling, and feedback, using an SQLite database (`sauna.db`) and supports CORS for frontend communication.
 
 ---
 
@@ -38,7 +30,14 @@ The backend of the **1on1MatchingAndFeedbackTool** application is built with Fla
 backend/
 ├── api_v1/
 │   ├── __init__.py
+│   ├── banned_to_meet_routes.py
+│   ├── coach_assignments_routes.py
+│   ├── coach_routes.py
+│   ├── coach_slots_routes.py
+│   ├── daily_feedback_routes.py
+│   ├── feedback_history_routes.py
 │   ├── routes.py
+│   └── startup_routes.py
 ├── data/
 │   ├── assigned_startups.json
 │   ├── assigned_startups_count.json
@@ -62,6 +61,7 @@ backend/
 ├── dataGen/
 │   ├── info
 │   │   ├── db_model.jpg
+│   │   ├── db_model_updated_mar2026.jpg
 │   │   ├── logic.model.jpg
 │   │   ├── rules.md
 │   │   └── tested_data.md
@@ -73,7 +73,9 @@ backend/
 │   ├── remove_shadow_ban.py
 │   └── user_match_restrictor.py
 ├── instance/
-│    ├── sauna.db
+│   └── sauna.db
+├── scripts/
+│   └── migrate_coach_names.py
 ├── testDatasets/
 │    ├── testSet1/
 │    │   ├── algo_output.md
@@ -90,11 +92,22 @@ backend/
 │    │   ├── test_startups.json
 │    │   └── test_total_feedbacks.json
 │    └── testSetInformation.md
-│
+├── validation/
+│   ├── __init__.py
+│   ├── banned_validation.py
+│   ├── base_validators.py
+│   ├── coach_assigment_validation.py
+│   ├── coach_slot_validation.py
+│   ├── coach_validation.py
+│   ├── daily_feedback_validation.py
+│   ├── feedback_history_validation.py
+│   └── startup_validation.py
 ├── __init__.py
 ├── algo.py
 ├── app.py
-└── requirements.txt
+├── requirements.txt
+├── schema.sql
+└── schema_clean.sql
 ```
 
 ---
@@ -104,64 +117,28 @@ backend/
 - **Database**: SQLite `sauna.db`
 - **Database URI**: `sqlite:///instance/sauna.db`
 - **CORS**: Enabled for `http://localhost:3000`
-- **Logging**: SQLAlchemy echo enabled for debugging
+- **Logging**: SQLAlchemy echo enabled for development
 - **Models**: 7 tables with full foreign key relationships
-- **ERD**: Located at backend/dataGen/info/db_model_updated_feb2026.png
+- **Validation**: Unified validation layer for all POST and PATCH requests, including type checks, JSON shape rules, unknown‑field rejection, and logical constraints
+- **Error Handling**: Consistent JSON error responses across all endpoints
+- **ERD**: Located at `backend/dataGen/info/db_model_updated_feb2026.png`
+
 
 ---
 
 ## Key Files and Components
 
-### 1. **`app.py`**
+### 1. `app.py`
 
-This is the main entry point of the backend application. It initializes the Flask app, configures the database, and defines API routes.
+This is the main entry point of the backend. It initializes Flask, configures the database, registers all CRUD routes, and applies the unified validation layer.
 
 #### Features:
-
-- Initializes Flask-SQLAlchemy with `sauna.db` (in the `instance/` folder).
-- Uses `sqlite:///instance/sauna.db` as the database URI. 
-- Enables CORS for frontend interaction (`http://localhost:3000`). 
-- Provides routes for: 
-  - Health check 
-  - Database connectivity check 
-  - Adding and fetching startups
-
-#### Routes:
-
-| HTTP Method | Endpoint    | Description                                         |
-| ----------- |-------------|-----------------------------------------------------|
-| `GET`       | `/`         | Returns a message confirming the API is running.    |
-| `GET`       | `/test-db`  | Verifies database connectivity with a simple query. |
-| `POST`      | `/startups` | Adds a new startup to the database.                 |
-| `GET`       | `/startups` | Fetches all startups from the database.             |
-
-#### Example Responses:
-
-- **GET `/`**:
-  ```json
-  {
-    "message": "API is running"
-  }
-  ```
-
-- **GET `/test-db`**:
-  ```json
-  {
-     "message": "Database connected successfully",
-     "status": "ok"
-  }
-  ```
-  
-- **POST `/startups`**:
-
-  ```json
-  {
-    "message": "Startup added successfully",
-    "startup": {
-      "StartupName": "Example Startup"
-    }
-  }
-  ```
+- Initializes Flask‑SQLAlchemy with `sauna.db`
+- Registers CRUD routes for all seven models
+- Applies validation for POST and PATCH requests
+- Provides health and database connectivity checks
+- Enables CORS for frontend integration
+- Ensures consistent JSON error responses
 
 ### 2. **`database/__init__.py`**
 
@@ -187,120 +164,86 @@ db = SQLAlchemy()
 
 ### 4. **Models in `database/models`**
 
-The database models represent the schema and data structure for entities in the application using SQLAlchemy ORM.
-They correspond directly to the tables in `sauna.db` and the ERD diagram.
+The models represent the schema and data structure for entities in the application using SQLAlchemy ORM. They correspond directly to the tables in `sauna.db` and the ERD diagram.
+JSON‑based fields (such as StartupMembers and SocialMedia) are stored as TEXT and validated before saving. All models support partial updates through PATCH with strict validation.
 
-#### Key Models:
-
-1. **`BannedToMeet`**:
-
-   - Tracks coach–startup pairs that are not allowed to meet.
-   - Includes date ranges and reasons for restrictions.
-    
-2. **`CoachAssignments`**:
-
-   - Records which coach is assigned to which startup.
-   - Links to specific time slots (`SlotId`).
-
-3. **`Coaches`**:
-
-   - Stores coach information, including:
-     - Name
-     - Email and phone
-     - Chat handle
-     - Bio and expertise
-     - Social media links     
-     - Number of coaching sessions and batches coached
-
-4. **`CoachSlots`**:
-
-   - Represents available time slots for coaches, including:
-      - Date
-      - Slot label
-      - Duration
-      - Break Indicator (`IsBreak`)
-
-5. **`DailyFeedback`**:
-
-   - Stores daily feedback entries for coach–startup interactions.
-   - Includes text feedback and grades.
-
-6. **`FeedbackHistory`**:
-
-   - Tracks feedback history over time.
-   - Stores:
-      - Original grades
-      - Updated grades 
-      - Text feedback from both sides 
-      - Links to `DailyFeedback`, `Startups`, and `Coaches`
-        
-
-7. **`Startups`**:
-   - Stores startup information, including:
-      - Name 
-      - Website 
-      - Status (alive, on-pause, dead)
-      - Members 
-      - Contacts 
-      - Description 
-      - Social media links 
-      - Number of meetings
+Key Models are presented in **Database Models**.
 
 ### 5. Documentation and Schema Files
 
-#### **`backend/dataGen/info/db_model_updated_feb2026.png`**
-Updated ERD (Entity–Relationship Diagram) reflecting the current database schema (February 2026 Update).
+#### **`backend/dataGen/info/db_model_updated_mar2026.png`**
+Updated ERD (Entity–Relationship Diagram) reflecting the current database schema (March 2026 Update).
+Includes the remastered Coaches model (`Title`, `FirstName`, `LastName`) and corrected relationships with cascade delete behavior.
 
 #### **`backend/dataGen/info/rules.md`**
 Contains matching logic, constraints, and business rules.
+Updated to align with the new structured coach naming and consistent foreign key relationships. 
 
 #### **`backend/dataGen/info/tested_data.md`**
 Includes sample data and meeting count tests used during development.
+Also documents cascade delete test scenarios performed in March 2026. 
 
 #### **`schema_clean.sql`**
 - Clean SQL schema used for generating the ERD. 
 - Uses unquoted identifiers and SQLite-compatible types.
+- Updated to reflect the new Coaches fields (`Title`, `FirstName`, `LastName`) and corrected foreign key constraints with `ON DELETE CASCADE`.
+
+#### **`schema.sql`**
+- Full schema used by the backend, now updated with structured coach names, JSON fields, and cascade delete rules across all models. 
 
 ---
 
 ## API Endpoints
 
+The backend exposes RESTful CRUD endpoints for all seven core models.  
+Each model supports:
+
+- **GET** (list and single item)
+- **POST** (create)
+- **PATCH** (partial update with strict validation)
+- **DELETE** (remove)
+
+All POST/PATCH requests pass through the unified validation layer, which enforces:
+- type checking  
+- JSON shape rules  
+- unknown‑field rejection  
+- logical constraints (e.g., DateTo ≥ DateFrom)  
+- consistent JSON error responses  
+
+Below is a summary of each model’s endpoints and example request/response formats.
+
+---
+
 ### 1. **Root Endpoint**
 
-- **Endpoint**: `/`
-- **Method**: `GET`
-- **Description**: Confirms that the API is running.
+`GET /`: Returns a simple health check.
+
+```json
+{ "message": "API is running" }
+```
+
+### 2. **Database Connectivity**
+
+`GET /test-db`: Verifies that the backend can connect to the SQLite database.
 
 #### Response:
 
 ```json
-{
-  "message": "API is running"
-}
+{ "message": "Database connected successfully", "status": "ok" }
 ```
 
-### 2. **Database Connectivity Check**
+### 3. **Database Model Endpoints**
 
-- **Endpoint**: `/test-db`
-- **Method**: `GET`
-- **Description**: Verifies that the backend can connect to the SQLite database.
+### **3.1 Startups**
 
-#### Response:
+- **Endpoints**: 
+- `GET /startups`
+- `GET /startups/<id>`
+- `POST /startups`
+- `PATCH /startups/<id>`
+- `DELETE /startups/<id>`
 
-```json
-{
-  "message": "Database connected successfully",
-  "status": "ok"
-}
-```
-
-### 3. **Add Startup**
-
-- **Endpoint**: `/startups`
-- **Method**: `POST`
-- **Description**: Adds a new startup to the database.
-
-#### Request Body:
+#### Example POST:
 
 ```json
 {
@@ -317,338 +260,602 @@ Includes sample data and meeting count tests used during development.
 }
 ```
 
-#### Successful Response:
+#### Example PATCH (Valid):
+Update startup status
+
+```json
+{ "Status": "on-pause" }
+```
+
+#### Example Error (Invalid Type):
+Status must be one of the allowed values
+
+```json
+{ "error": "Status must be one of: alive, on-pause, dead" }
+```
+
+### **3.2 Coaches**
+
+- **Endpoints**: 
+- `GET /coaches`
+- `GET /coaches/<id>`
+- `POST /coaches`
+- `PATCH /coaches/<id>`
+- `DELETE /coaches/<id>`
+
+
+#### Example POST:
 
 ```json
 {
-  "message": "Startup added successfully",
-  "startup": {
-    "StartupName": "Example Startup"
-  }
-}
-```
-
-#### Error Example:
-
-```json
-{
-  "error": "Website is required"
-}
-```
-
-### 4. **Get Startups**
-
-- **Endpoint**: `/startups`
-- **Method**: `GET`
-- **Description**: Fetches all startups from the database.
-
-#### Response Example:
-
-```json
-[
-  {
-    "MeetingsCount": 0,
-    "PreviousNames": null,
-    "StartupDescription": null,
-    "StartupId": 1,
-    "StartupMembers": [
-      {
-        "email": "alice@example.com",
-        "level": "primary",
-        "name": "Alice Founder"
-      }
-    ],
-    "StartupName": "Example Startup",
-    "StartupSocialMedia": null,
-    "Status": "alive",
-    "Website": "https://example.com"
-  }
-]
-```
-
-### 5. **Add Coach**
-
-- **Endpoint**: `/coaches`
-- **Method**: `POST`
-- **Description**: Adds a new coach to the database.
-
-#### Request Body:
-
-```json
-{
-  "CoachName": "John Mentor",
+  "FirstName": "John",
+  "LastName": "Mentor",
   "Email": "john.mentor@example.com",
-  "Phone": "+358401234567",
-  "Chat": "@johnmentor",
-  "Expertise": "Growth, fundraising, product strategy",
-  "Bio": "Experienced startup coach specializing in early-stage growth.",
-  "CoachingSessions": 12,
-  "BatchesCoached": 3,
-  "SocialMedia": [
-    "https://linkedin.com/in/johnmentor",
-    "https://twitter.com/johnmentor"
-  ]
+  "Expertise": "Growth, fundraising",
+  "SocialMedia": { "linkedin": "https://linkedin.com/in/johnmentor" }
 }
 ```
 
-#### Successful Response:
+#### Example PATCH (Valid)
+Update coach’s contact info *(The phone number is only the example.)*
+
+```json
+{ "Phone": "+358401234567" }
+```
+
+#### Example Error (Invalid Type):
+
+```json
+{ "error": "Email must be a string" }
+```
+
+### **3.3 Coach Slots**
+
+- **Endpoints**: 
+- `GET /coach_slots`
+- `GET /coach_slots/<id>`
+- `POST /coach_slots`
+- `PATCH /coach_slots/<id>`
+- `DELETE /coach_slots/<id>`
+
+#### Example POST:
 
 ```json
 {
-  "coach": {
-    "BatchesCoached": 3,
-    "Bio": "Experienced startup coach specializing in early-stage growth.",
-    "Chat": "@johnmentor",
-    "CoachName": "John Mentor",
-    "CoachingSessions": 12,
-    "Email": "john.mentor@example.com",
-    "Expertise": "Growth, fundraising, product strategy",
-    "Phone": "+358401234567",
-    "SocialMedia": [
-      "https://linkedin.com/in/johnmentor",
-      "https://twitter.com/johnmentor"
-    ]
-  },
-  "message": "Coach added successfully"
+  "CoachId": 1,
+  "Date": "2026-03-01",
+  "Slot": "10:00–10:20",
+  "Duration": 20,
+  "IsBreak": false
 }
 ```
 
-#### Error Response:
+#### Example PATCH (Valid)
+Update slot duration
+
+```json
+{ "Duration": 30 }
+```
+
+#### Example Error (Invalid Type):
+
+```json
+{ "error": "Duration must be an integer" }
+```
+
+### **3.4 Coach Assignments**
+
+- **Endpoints**: 
+- `GET /coach_assignments`
+- `GET /coach_assignments/<id>`
+- `POST /coach_assignments`
+- `PATCH /coach_assignments/<id>`
+- `DELETE /coach_assignments/<id>`
+
+#### Example POST:
 
 ```json
 {
-  "error": "CoachName is required"
+  "CoachId": 2,
+  "StartupId": 5,
+  "SlotId": 12
 }
 ```
 
-### 6. **Get Coaches**
+#### Example PATCH (Valid)
+Update assigned slot
 
-- **Endpoint**: `/coaches`
-- **Method**: `GET`
-- **Description**: Fetches all coaches from the database.
-
-#### Response Example:
 ```json
-[
-  {
-    "BatchesCoached": 3,
-    "Chat": "@johnmentor",
-    "CoachId": null,
-    "CoachName": "John Mentor",
-    "CoachingSessions": 12,
-    "Email": "john.mentor@example.com",
-    "Expertise": "Growth, fundraising, product strategy",
-    "Phone": "+358401234567",
-    "SocialMedia": [
-      "https://linkedin.com/in/johnmentor",
-      "https://twitter.com/johnmentor"
-    ]
-  }
-]
+{ "SlotId": 15 }
+```
+
+#### Example Error (Invalid Type):
+
+```json
+{ "error": "SlotId must be an integer" }
+```
+
+### **3.5 Daily Feedback**
+
+- **Endpoints**: 
+- `GET /daily_feedback`
+- `GET /daily_feedback/<id>`
+- `POST /daily_feedback`
+- `PATCH /daily_feedback/<id>`
+- `DELETE daily_feedback/<id>`
+
+#### Example POST:
+
+```json
+{
+  "CoachId": 1,
+  "StartupId": 3,
+  "Grade": 1,
+  "FeedbackText": "Great progress today."
+}
+```
+
+#### Example PATCH (Valid)
+Update feedback text
+
+```json
+{ "FeedbackText": "Improved clarity in pitch." }
+```
+
+#### Example Error (Invalid Type):
+
+```json
+{ "error": "FeedbackText must be a string" }
+```
+
+### **3.6 Feedback History**
+
+- **Endpoints**: 
+- `GET /feedback_history`
+- `GET /daily_feedback/<id>`
+- `POST /daily_feedback`
+- `PATCH /daily_feedback/<id>`
+- `DELETE daily_feedback/<id>`
+
+**Notes:** *`FeedbackHistory` shouldn't be deleted but the DELETE method has been used for manual testing.*
+
+#### Example POST:
+
+```json
+{
+  "DailyFeedbackId": 10,
+  "StartupId": 5,
+  "CoachId": 3,
+  "StartupGrade": 4,
+  "CoachGrade": 5
+}
+```
+
+#### Example PATCH (Valid)
+Update updated grade
+
+```json
+{ "UpdatedStartupGrade": 3 }
+```
+
+#### Example Error (Invalid Type):
+
+```json
+{ "error": "UpdatedStartupGrade must be an integer between 1 and 5" }
+```
+
+### **3.7 Banned To Meet**
+
+- **Endpoints**: 
+- `GET /banned_to_meet`
+- `GET /banned_to_meet/<id>`
+- `POST /banned_to_meet`
+- `PATCH /banned_to_meet/<id>`
+- `DELETE banned_to_meet/<id>`
+
+**Notes:** *`BannedToMeet` shouldn't be deleted but the DELETE method has been used for manual testing.*
+
+#### Example POST:
+
+```json
+{
+  "StartupId": 1,
+  "CoachId": 2,
+  "DateFrom": "2026-03-01",
+  "DateTo": "2026-03-10",
+  "Reason": "Conflict of interest"
+}
+```
+
+#### Example PATCH (Valid)
+Update DateTo
+
+```json
+{ "DateTo": "2026-03-15" }
+```
+
+#### Example Error (Invalid Logic):
+
+```json
+{ "error": "DateTo must be greater than or equal to DateFrom" }
+```
+
+---
+
+## Validation Testing
+
+The backend features a unified validation layer for all `POST` and `PATCH` requests across seven models, ensuring that incoming data is structurally correct, type-safe, logically consistent, and devoid of unknown fields. 
+This section outlines the validation rules and includes example test cases based on actual development testing.
+
+### 1. Validation Philosophy
+
+All POST and PATCH requests follow the same validation principles:
+
+- **Strict field validation**: Only known fields are allowed. Unknown fields trigger an error.
+- **Type checking**: Every field must match the expected type (string, integer, boolean, list, object).
+- **JSON shape validation**: Nested structures (e.g., `StartupMembers`, `SocialMedia`) must follow the correct schema.
+- **Logical constraints**, for examples:
+   - `DateTo` ≥ `DateFrom` 
+   - Grades must be integers within allowed ranges (FeedbackHistory only)
+   - Foreign keys must reference existing records
+- **PATCH partial updates**: Only provided fields are validated and updated. Empty PATCH bodies are rejected.
+- **Consistent error responses**: All validation failures return
+```json
+{ "error": "Description of the validation error" }
+```
+- **Record existence checks**: PATCH/DELETE on non‑existent IDs return
+```json
+{ "error": "Record not found" }
+```
+
+### 2. Main Validation Cases (Across All Models)
+
+This subsection consolidates key validation scenarios from all seven models, representing crucial patterns of validation behavior essential for developers' understanding.
+
+### Unknown Fields
+Occurs when the request contains keys not defined in the model.
+
+**Example:**
+```json
+{ "RandomField": "test" }
+```
+
+**Error:**
+```json
+{ "error": "Unknown field: RandomField" }
+```
+
+### Wrong Data Types
+Triggered when a field has the wrong primitive type.
+
+**Examples:**
+```json
+{ "Email": 123 }
+{ "Duration": "sixty" }
+{ "StartupId": "five" }
+{ "FirstName": 99 }
+```
+
+**Errors:**
+```json
+{ "error": "Email must be a string" }
+{ "error": "Duration must be an integer" }
+{ "error": "StartupId must be an integer" }
+{ "error": "FirstName must be a string" }
+```
+
+### Wrong JSON Shapes
+Used for nested structures that must follow a specific schema.
+
+**Examples:**
+```json
+{ "StartupMembers": ["Alice"] }
+{ "SocialMedia": "linkedin.com/john" }
+{ "StartupSocialMedia": [] }
+```
+
+**Errors:**
+```json
+{ "error": "StartupMembers must be a list of objects" }
+{ "error": "SocialMedia must be an object" }
+{ "error": "StartupSocialMedia must be an object" }
+```
+
+### Invalid Enum Values
+Used when a field must match a predefined set of allowed values.
+
+**Example:**
+```json
+{ "Status": "Active" }
+```
+
+**Error:**
+```json
+{ "error": "Status must be one of: alive, on-pause, dead" }
+```
+
+### Invalid Date Formats
+All dates must follow ISO format `YYYY-MM-DD`.
+
+**Example:**
+```json
+{ "Date": "March 1st" }
+```
+
+**Error:**
+```json
+{ "error": "Date must be in YYYY-MM-DD format" }
+```
+
+### Logical Constraints
+Used when fields must satisfy a relationship.
+
+**Example:**
+```json
+{ "DateFrom": "2026-03-10", "DateTo": "2026-03-01" }
+```
+
+**Error:**
+```json
+{ "error": "DateTo must be greater than or equal to DateFrom" }
+```
+
+### Empty PATCH Body
+PATCH must include at least one valid field.
+
+**Example:**
+```json
+{}
+```
+
+**Error:**
+```json
+{ "error": "No valid fields provided for update" }
+```
+
+### Record Not Found
+Occurs when the ID does not exist in the database.
+
+**Example:**
+`PATCH /startups/9999`
+
+**Error:**
+```json
+{ "error": "Not found" }
 ```
 
 ---
 
 ## Database Models
 
-All models are defined in `database/models`.  
-Each model represents a table in `sauna.db` and includes relationships that connect entities across the system.
+All models are defined in `database/models`.
+Each model corresponds to a table in `sauna.db` and follows a consistent structure with:
+- clearly defined columns
+- foreign‑key relationships
+- JSON‑based fields stored as TEXT
+- full CRUD support
+- unified validation for `POST` and `PATCH`
+The complete schema is shown in the ERD `(db_model_updated_mar2026.png)`.
+
+### 1. Startups
+Represents a startup participating in the program.
+
+**Key characteristics:**
+- Uses flexible JSON fields (`StartupMembers`, `StartupSocialMedia`, `PreviousNames`)
+- Tracks metadata such as `Status`, `MeetingsCount`, and `Website`
+- Enforces strict validation for nested JSON structures
+- Connected to feedback, assignments, and banned‑to‑meet records
+- Deleting a startup cascades to: `DailyFeedback`, `FeedbackHistory`, `CoachAssignments`, `BannedToMeet`
+
+### 2. Coaches`
+Represents a coach in the program.
+
+**Key characteristics:**
+- Uses structured name fields: `Title`, `FirstName`, `LastName`
+- Stores profile information (title, first name, last name, email, phone, chat)
+- Includes counters (`CoachingSessions`, `BatchesCoached`)
+- Supports JSON `SocialMedia` field
+- Linked to slots, assignments, feedback, and restrictions
+- Deleting a coach cascades to: `CoachSlots`, `CoachAssignments`, `DailyFeedback`, `FeedbackHistory`, `BannedToMeet`
+
+### 3. CoachSlots
+Represents available time slots for each coach.
+
+**Key characteristics:**
+- Includes `Date`, `Slot`, `Duration`, and `IsBreak`
+- Linked to `CoachId`
+- Used by the matching engine and assignment logic
+- Deleting a coach automatically removes all their slots
+
+### 4. CoachAssignments
+Represents the mapping between a coach, a startup, and a specific slot.
+
+**Key characteristics:**
+- Connects `CoachId`, `StartupId`, and `SlotId`
+- Tracks scheduled 1‑on‑1 meetings
+- Supports updates to any of the linked foreign keys
+- Cascades when a coach, startup, or slot is deleted
+
+### 5. DailyFeedback
+Represents daily feedback given after each meeting.
+
+**Key characteristics:**
+- Stores `FeedbackText`, and `Date`
+- Linked to both `CoachId` and `StartupId`
+- Forms the basis for historical feedback tracking
+- Deleting a coach or startup removes related daily feedback
+
+### 6. FeedbackHistory
+Represents historical revisions of feedback.
+
+**Key characteristics:**
+- Stores original and updated grades
+- Includes text feedback from both sides
+- Tracks update timestamps
+- Linked to `DailyFeedbackId`, `StartupId`, and `CoachId`
+- Uses corrected field names: `StartupTextFeedback`, `CoachTextFeedback`, `UpdatedStartupGrade`, `DateUpdatedStartupGrade`
+- Cascades when related daily feedback, coach, or startup is deleted
+
+### 7. BannedToMeet
+Represents restrictions preventing certain coach–startup meetings.
+
+**Key characteristics:**
+- Stores `DateFrom`, `DateTo`, and `Reason`
+- Enforces logical constraints (e.g., `DateTo ≥ DateFrom`)
+- Used by the matching engine to avoid invalid pairings
+- Cascades when either the coach or startup is deleted
 
 ---
 
-### 1. **`Startups`**
+## Cascade Delete Behavior
 
-Represents a startup participating in the program.  
-This model has been fully modernized to support flexible JSON fields and richer metadata.
+The backend employs database-level cascade delete rules to maintain data integrity across seven models. 
+When a parent record, like a coach or startup, is deleted, all dependent records are also automatically removed, preventing orphaned rows 
+and ensuring relational consistency. This cascade behavior is implemented in the SQL schema through `ON DELETE CASCADE` and is reflected in 
+SQLAlchemy model relationships.
 
-```python
-class Startups(db.Model):
-    __tablename__ = 'startups'
-    StartupId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+### 1. Delete a Coach
+Removing a coach automatically deletes all records linked to that coach:
+- **CoachSlots** (their available time slots)
+- **CoachAssignments** (scheduled meetings)
+- **DailyFeedback** (daily interaction logs)
+- **FeedbackHistory** (historical feedback revisions)
+- **BannedToMeet** (restriction rules involving that coach)
 
-    # Core Identity
-    StartupName = db.Column(db.String(100), nullable=False)
-    Website = db.Column(db.String(255), nullable=False)
-    # Status: alive / on-pause / dead
-    Status = db.Column(db.String(20), nullable=False, default="alive")
-    # Optional list of previous names
-    PreviousNames = db.Column(db.JSON, nullable=False)
-    # Members: list of objects { name, email, phone, role, level }
-    StartupMembers = db.Column(db.JSON, nullable=False)
-    # Flexible social media links (list of URLs)
-    StartupSocialMedia = db.Column(db.JSON, nullable=True)
-    # Optional description
-    StartupDescription = db.Column(db.String(255), nullable=True)
-    # Internal counter used by the matching tool
-    MeetingsCount = db.Column(db.Integer, nullable=False, default=0)
-    # Relationships
-    feedback = db.relationship('FeedbackHistory', back_populates='startup')
-    daily_feedback = db.relationship('DailyFeedback', back_populates='startup')
-    assignments = db.relationship('CoachAssignments', back_populates='startup')
-```
+### 2. Delete a Startup
+Removing a startup cascades through all related tables:
+**DailyFeedback**, **FeedbackHistory**, **CoachAssignments**, **BannedToMeet**
 
-### 2. **`Coaches`**
+### 3. Deleting a CoachSlot
+When a slot is deleted, All **CoachAssignments** linked to that slot are automatically removed.
 
-Represents a coach in the program.
-Supports flexible profile fields and activity counters.
+### 4. Deleting DailyFeedback
+When a daily feedback entry is removed, All **FeedbackHistory** entries referencing it are also deleted.
 
-```python
-class Coaches(db.Model):
-    __tablename__ = 'coaches'
-    CoachId = db.Column(db.Integer, primary_key=True)
+### 5. Summary of Cascade Rules
 
-    # Required
-    CoachName = db.Column(db.String(100), nullable=False)
-    Email = db.Column(db.String(100), nullable=False, unique=True)
-    # Optional contact methods
-    Phone = db.Column(db.String(100), nullable=True)
-    Chat = db.Column(db.String(100), nullable=True)
-    # Profile information
-    Bio = db.Column(db.Text, nullable=True)
-    Expertise = db.Column(db.String(200), nullable=True)
-    # Flexible list of social media links
-    SocialMedia = db.Column(JSON, nullable=True)
-    # Activity counters
-    CoachingSessions = db.Column(db.Integer, nullable=False, default=0)
-    BatchesCoached = db.Column(db.Integer, nullable=False, default=0)
-    # Relationships
-    slots = db.relationship('CoachSlots', back_populates='coach')
-    feedback = db.relationship('FeedbackHistory', back_populates='coach')
-    daily_feedback = db.relationship('DailyFeedback', back_populates='coach')
-    assignments = db.relationship('CoachAssignments', back_populates='coach')
-```
+| Parent Deleted    | Automatically Removed                                                      |
+|-------------------|----------------------------------------------------------------------------|
+| Coach             | CoachSlots, CoachAssignments, DailyFeedback, FeedbackHistory, BannedToMeet |
+| Startup           | DailyFeedback, FeedbackHistory, CoachAssignments, BannedToMeet             |
+| CoachSlot         | CoachAssignments                                                           |
+| DailyFeedback     | FeedbackHistory                                                            |
 
-### 3. **Other Models**
-The backend also includes:
-- CoachSlots: available time slots for each coach
-- CoachAssignments: mapping between coaches, startups, and slots
-- DailyFeedback: daily feedback entries
-- FeedbackHistory: historical feedback revisions
-- BannedToMeet: restrictions preventing certain coach–startup meetings 
-These models follow the same structure and are fully represented in the ERD diagram (db_model_updated_feb2026.png).
+### 6. Testing Summary (March 2026)
+
+Cascade behavior was verified through manual and automated tests:
+- Creating a coach/startup with related slots, assignments, feedback, and bans
+- Deleting the parent record
+- Confirming all dependent rows were removed
+- Ensuring no orphaned foreign keys remained
+- Verifying that unrelated records were untouched 
+
+All cascade paths behaved as expected and matched the SQL schema and ERD.
 
 ---
 
 ## API v1 (Routing Prototype)
 
 The `api_v1` folder contains an early prototype of the routing structure using Flask Blueprints.  
-These routes were created for testing and do not yet include real database logic.
+These routes were created before the full CRUD backend existed and were used only to test URL patterns and request handling.
 
 ### Purpose of `api_v1`
-- Experiment with route organization using Blueprints.
-- Test URL patterns and HTTP methods.
-- Prepare the structure for future full API implementation.
+- Prototype route structure with Blueprints
+- Test URL patterns and HTTP methods
+- Provide a temporary sandbox before real database logic was implemented
 
-### Current Placeholder Routes
+### Placeholder Routes
+These routes return static JSON and **do not** interact with the database.
 
-| Endpoint                   | Method | Description                                                        |
-|----------------------------|--------|--------------------------------------------------------------------|
-| `/match`                   | POST   | Placeholder for the matching algorithm.                            |
-| `/feedback/<startup_id>`   | GET    | Placeholder for retrieving feedback for a startup.                 |
-| `/availability/<coach_id>` | GET    | Placeholder for retrieving coach availability.                     |
-| `/startup/<id>`            | PATCH  | Placeholder for updating startup information.                      |
+| Endpoint          | Method | Description                                  |
+|-------------------|--------|----------------------------------------------|
+| `/match`          | POST   | Placeholder for the matching algorithm       |
+| `/feedback/`      | GET    | Placeholder for retrieving feedback          |
+| `/availability/`  | GET    | Placeholder for coach availability           |
+| `/startup/`       | PATCH  | Placeholder for updating startup information |
 
 ### Status
-- These routes **do not** interact with the database yet.
-- They return static JSON responses for testing.
-- They will be replaced or expanded when full CRUD logic is implemented for all models.
+- Prototype only
+- Kept for reference
+- Will be removed or replaced as the full API is now implemented
 
 ---
 
 ## Data Generation Scripts
 
-Located in `backend/dataGen`, these scripts are used for generating test data, validating matching logic, and supporting development workflows.
-They are not part of the production API but help simulate realistic program data. ### Key Scripts
+The `backend/dataGen` folder contains helper scripts used during development to generate test data and simulate program workflows.
+These scripts are **not part of the production API.**
 
 ### 1. **`genStartups.py`**:
-- Generates sample startup entries for testing. 
-- Produces structured JSON fields such as: 
+- Generates sample startup data, including:
    - `StartupMembers` 
    - `StartupSocialMedia` 
    - `PreviousNames` 
 - Useful for populating the database during development.
 
 ### 2. **`filling_feedbacks.py`**
-- Simulates daily feedback submissions.
-- Generates:
+- Simulates:
   - `DailyFeedback` entries
   - `FeedbackHistory` updates
-- Helps test feedback-related endpoints and relationships.
+- Used to test feedback endpoints and relationships.
 
 ### 3. `remove_shadow_ban.py` 
-- Admin utility for removing entries from `BannedToMeet`. 
-- Useful when testing scheduling logic or resetting constraints.
+- Utility for clearing entries in `BannedToMeet`.
+- Helpful when resetting constraints during scheduling tests.
 
-### 4. Documentation Files in `dataGen/info`
-- **`db_model_updated_feb2026.png`**: Updated ERD diagram.
-- **`rules.md`**: — Matching logic, constraints, and business rules.
-- **`tested_data.md`**: — Sample meeting counts and imbalance testing notes.
+### 4. Documentation Files in (`dataGen/info`)
+- **`db_model_updated_feb2026.png`**: Updated ERD diagram
+- **`rules.md`**: — Matching logic, constraints, and business rules
+- **`tested_data.md`**: — Sample meeting counts and imbalance tests
 
 ---
 
 ## Environment Variables
-
-The backend supports the following environment variables.  
-Defaults are provided for local development.
+The backend supports a small set of environment variables.
+Defaults are provided for local development, and no additional configuration is required for basic usage.
 
 ### 1. **`SQLALCHEMY_DATABASE_URI`**:
    - Defines the database connection string.
-   - **Current default** (development):
-   - `sqlite:///instance/sauna.db` Uses Flask’s `instance/` folder for safe, writable storage.
+   - **Default** (development): `sqlite:///instance/sauna.db` 
+   - Uses Flask’s `instance/` folder for safe, writable storage.
 
 ### 2. **`REACT_APP_BACKEND_URL`**:
    - Base URL for the frontend to communicate with the backend.
-   - Example (local development): `http://localhost:5000`
+   - Typical local value: `http://localhost:5000`
 
 ### 3. **Optional Debug Variables**
+These are helpful during development but not required in production:
    - `FLASK_ENV=development`
    - `FLASK_DEBUG=1`
-   - Enable hot reload and detailed error messages.
+
+They enable hot reload and detailed error messages.
 
 ---
 
 ## Future Enhancements
 
-These items represent the remaining backend work that has not yet been implemented.
+The backend is now stable with full CRUD, unified validation, and consistent error handling.
+The remaining work focuses on deeper functionality, integration, and long‑term maintainability.
 
-### 1. **Complete API Endpoints for All Models**
+### 1. **Matching Engine Integration**
 Add full CRUD endpoints for the remaining database models:
-- CoachSlots
-- CoachAssignments
-- DailyFeedback
-- FeedbackHistory
-- BannedToMeet
+- Implement the real matching algorithm based on `rules.md`
+- Replace the `/match` prototype route with production logic
+- Use live data from Startups, Coaches, Slots, and BannedToMeet
+- Add helper utilities for scoring, filtering, and conflict resolution
 
-This will complete backend coverage for all 7 tables.
-
-### 2. Integrate `api_v1` Blueprint With Real Logic 
-- Replace placeholder responses with real SQLAlchemy operations. 
-- Connect: 
-   - `/match` → matching algorithm (based on rules.md)
-   - `/feedback/<startup_id>` → DailyFeedback + FeedbackHistory 
-   - `/availability/<coach_id>` → CoachSlots 
-   - `/startup/<id>` → PATCH update for Startups
+### 2. Upgrade `api_v1` Prototype Routes
+- Remove temporary placeholder endpoints
+- Connect them to real/finalized SQLAlchemy queries
+- Align routing structure with the production matching engine
 
 ### 3. Frontend–Backend Integration
-- Connect frontend forms to the new API structure.
-- Implement UI flows for:
-  - Startup creation and listing
-  - Coach creation and listing
-  - Scheduling (slots + assignments)
-  - Feedback submission and history
+- Connect frontend forms and flows to the new CRUD API
+- Add UI for scheduling, feedback, and entity management
+- Surface validation and error messages in the UI
 
-### 4. **Error Handling & Validation**
-- Add consistent validation for JSON fields.
-- Standardize error responses.
-- Implement global error handlers.
-
-### 5. **Testing**
-- Add unit tests for models serialization and JSON fields.
-- Add integration tests for Startup creation, Coach creation, and Feedback flows
-- Add workflow tests for `api_v1` once real logic is implemented.
-
-### 6. **Performance Optimization**
-- Add indexes for frequently queried fields.
-- Optimize queries involving assignments and feedback.
-- Add pagination for large datasets.
-
+### 4. **Automated Testing (pytest)**
+- Add unit tests for models and serialization
+- Add validation tests for POST/PATCH logic
+- Add integration tests for all CRUD endpoints
+- Add workflow tests for scheduling, matching, and feedback

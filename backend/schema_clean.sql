@@ -1,6 +1,8 @@
 CREATE TABLE coaches (
-	CoachId INTEGER NOT NULL,
-	CoachName VARCHAR(100) NOT NULL,
+    CoachId INTEGER NOT NULL,
+    Title VARCHAR(20),
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
 	Email VARCHAR(100) NOT NULL,
 	Phone VARCHAR(100),
 	Chat VARCHAR(100),
@@ -32,8 +34,8 @@ CREATE TABLE banned_to_meet (
 	DateTo DATE,
 	Reason TEXT,
 	PRIMARY KEY (RestrictionId),
-	FOREIGN KEY(StartupId) REFERENCES startups (StartupId),
-	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId)
+	FOREIGN KEY(StartupId) REFERENCES startups (StartupId) ON DELETE CASCADE,
+	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId) ON DELETE CASCADE
 );
 CREATE TABLE coach_slots (
 	SlotId INTEGER NOT NULL,
@@ -43,7 +45,7 @@ CREATE TABLE coach_slots (
 	Date DATE NOT NULL,
 	IsBreak BOOLEAN NOT NULL,
 	PRIMARY KEY (SlotId),
-	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId)
+	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId) ON DELETE CASCADE
 );
 CREATE TABLE daily_feedback (
 	DailyFeedbackId INTEGER NOT NULL,
@@ -52,8 +54,8 @@ CREATE TABLE daily_feedback (
 	StartupId INTEGER NOT NULL,
 	CoachId INTEGER NOT NULL,
 	PRIMARY KEY (DailyFeedbackId),
-	FOREIGN KEY(StartupId) REFERENCES startups (StartupId),
-	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId)
+	FOREIGN KEY(StartupId) REFERENCES startups (StartupId) ON DELETE CASCADE,
+	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId) ON DELETE CASCADE
 );
 CREATE TABLE coach_assignments (
 	AssignmentId INTEGER NOT NULL,
@@ -65,9 +67,9 @@ CREATE TABLE coach_assignments (
 	StartupId INTEGER NOT NULL,
 	SlotId INTEGER NOT NULL,
 	PRIMARY KEY (AssignmentId),
-	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId),
-	FOREIGN KEY(StartupId) REFERENCES startups (StartupId),
-	FOREIGN KEY(SlotId) REFERENCES coach_slots (SlotId)
+	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId) ON DELETE CASCADE,
+	FOREIGN KEY(StartupId) REFERENCES startups (StartupId) ON DELETE CASCADE,
+	FOREIGN KEY(SlotId) REFERENCES coach_slots (SlotId) ON DELETE CASCADE
 );
 CREATE TABLE feedback_history (
 	FeedbackHistoryId INTEGER NOT NULL,
@@ -83,7 +85,7 @@ CREATE TABLE feedback_history (
 	StartupId INTEGER NOT NULL,
 	CoachId INTEGER NOT NULL,
 	PRIMARY KEY (FeedbackHistoryId),
-	FOREIGN KEY(DailyFeedbackId) REFERENCES daily_feedback (DailyFeedbackId),
-	FOREIGN KEY(StartupId) REFERENCES startups (StartupId),
-	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId)
+	FOREIGN KEY(DailyFeedbackId) REFERENCES daily_feedback (DailyFeedbackId) ON DELETE CASCADE,
+	FOREIGN KEY(StartupId) REFERENCES startups (StartupId) ON DELETE CASCADE,
+	FOREIGN KEY(CoachId) REFERENCES coaches (CoachId) ON DELETE CASCADE
 );
