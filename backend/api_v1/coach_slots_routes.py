@@ -1,18 +1,51 @@
 from flask import request, jsonify
+from datetime import datetime
 from backend.database.base import db
 from backend.database import CoachSlots
 from backend.validation.coach_slot_validation import validate_coach_slot
-from .routes import api_v1, row_to_dict, parse_date
+from backend.date_utils import parse_date, parse_db_date
+from .routes import api_v1, row_to_dict
 
-@api_v1.route("/coach_slots", methods=["GET"])
-def get_coach_slots():
+@api_v1.route("/coach_slots/all", methods=["GET"]) # Returns everything
+def get_all_coach_slots():
     try:
         rows = CoachSlots.query.all()
         return jsonify([row_to_dict(r) for r in rows]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@api_v1.route("/coach_slots/<int:id>", methods=["GET"])
+@api_v1.route("/coach_slots", methods=["GET"]) # Returns filtered results (past/future ones)
+def get_coach_slots():
+    try:
+        coach_id = request.args.get("coachId", type=int)
+        include_future = request.args.get("includeFuture", "false").lower() == "true"
+        include_past = request.args.get("includePast", "false").lower() == "true"
+
+        if not coach_id:
+            return jsonify({"error": "coachId is required"}), 400
+
+        all_slots = CoachSlots.query.filter_by(CoachId=coach_id).all()
+        today = datetime.utcnow().date()
+
+        if include_future:
+            slots = [
+                s for s in all_slots
+                if parse_db_date(s.Date) and parse_db_date(s.Date) > today
+            ]
+        elif include_past:
+            slots = [
+                s for s in all_slots
+                if parse_db_date(s.Date) and parse_db_date(s.Date) <= today
+            ]
+        else:
+            slots = all_slots
+
+        return jsonify([row_to_dict(s) for s in slots]), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@api_v1.route("/coach_slots/<int:id>", methods=["GET"]) # Returns one row
 def get_coach_slot_by_id(id):
     try:
         row = CoachSlots.query.get(id)

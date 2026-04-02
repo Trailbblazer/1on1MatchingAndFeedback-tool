@@ -1,11 +1,13 @@
 from flask import request, jsonify
+from datetime import datetime
 from backend.database.base import db
-from backend.database import Coaches
+from backend.database import (Coaches, CoachSlots, CoachAssignments, DailyFeedback, FeedbackHistory)
 from backend.validation.coach_validation import validate_coach
-from backend.api_v1.routes import api_v1, row_to_dict, parse_date
+from backend.date_utils import parse_db_date
+from backend.api_v1.routes import api_v1, row_to_dict
 import logging
 
-@api_v1.route("/coaches", methods=["GET"])
+@api_v1.route("/coaches/all", methods=["GET"])
 def get_coaches():
     try:
         coaches = Coaches.query.all()
@@ -31,16 +33,10 @@ def add_coach():
         data = request.json or {}
         validate_coach(data)
 
-        title = data.get("Title")
-        first = data.get("FirstName")
-        last = data.get("LastName")
-
-        full_name = " ".join([p for p in [title, first, last] if p])
-
         new_coach = Coaches(
-            Title=title,
-            FirstName=first,
-            LastName=last,
+            Title=data.get("Title"),
+            FirstName=data.get("FirstName"),
+            LastName=data.get("LastName"),
             Email=data.get("Email"),
             Phone=data.get("Phone"),
             Chat=data.get("Chat"),
@@ -83,10 +79,6 @@ def patch_coach(id):
             if key in allowed_fields:
                 setattr(coach, key, value)
 
-        coach.CoachName = " ".join(
-            p for p in [coach.Title, coach.FirstName, coach.LastName] if p
-        )
-
         db.session.commit()
         return jsonify({"message": "Coach updated"}), 200
 
@@ -100,11 +92,36 @@ def delete_coach(id):
     try:
         coach = Coaches.query.get(id)
         if not coach:
-            return jsonify({"error": "Not found"}), 404
+            return jsonify({"error": "Coach not found"}), 404
+        now = datetime.utcnow().date()
 
+        # Delete upcoming slots
+        all_slots = CoachSlots.query.filter_by(CoachId=id).all()
+        upcoming_slots = [
+            s for s in all_slots
+            if parse_db_date(s.Date) and parse_db_date(s.Date) >= now
+        ]
+        for slot in upcoming_slots:
+            db.session.delete(slot)
+
+        # Delete upcoming assignments
+        all_assignments = CoachAssignments.query.filter_by(CoachId=id).all()
+        upcoming_assignments = [
+            a for a in all_assignments
+            if parse_db_date(a.Date) and parse_db_date(a.Date) >= now
+        ]
+        for assignment in upcoming_assignments:
+            db.session.delete(assignment)
+
+        # Anonymize feedback (keep feedback, remove coach reference)
+        DailyFeedback.query.filter_by(CoachId=id).update({"CoachId": None})
+        FeedbackHistory.query.filter_by(CoachId=id).update({"CoachId": None})
+
+        # Delete the coach
         db.session.delete(coach)
+
         db.session.commit()
-        return jsonify({"message": "Coach deleted"}), 200
+        return jsonify({"message": "Coach deleted safely"}), 200
 
     except Exception as e:
         db.session.rollback()

@@ -8,7 +8,7 @@ def validate_coach_slot(data):
     validate_int("CoachId", data["CoachId"], min_val=1)
 
     # Slot
-    validate_string("Slot", data["Slot"], min_len=1, max_len=50)
+    data["Slot"] = validate_slot("Slot", data["Slot"])
 
     # Duration
     validate_int("Duration", data["Duration"], min_val=1, max_val=240)
@@ -18,3 +18,5 @@ def validate_coach_slot(data):
 
     # IsBreak
     validate_bool("IsBreak", data["IsBreak"])
+
+    return data

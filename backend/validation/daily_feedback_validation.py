@@ -36,6 +36,10 @@ def validate_daily_feedback(data, is_patch=False):
     if "CoachId" in data:
         validate_int("CoachId", data["CoachId"], min_val=1)
 
-    # FeedbackText
+    # FeedbackText (free text, emojis allowed)
     if "FeedbackText" in data and data["FeedbackText"] is not None:
-        validate_string("FeedbackText", data["FeedbackText"], min_len=1, max_len=2000)
+        cleaned = validate_free_text("FeedbackText", data["FeedbackText"])
+        validate_string("FeedbackText", cleaned, min_len=1, max_len=2000)
+        data["FeedbackText"] = cleaned
+
+    return data

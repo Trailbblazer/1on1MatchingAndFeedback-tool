@@ -50,6 +50,10 @@ def validate_banned_to_meet(data, is_patch=False):
                 "DateTo": data["DateTo"]
             })
 
-    # Reason
+    # Reason (free-text, emojis allowed)
     if "Reason" in data and data["Reason"] is not None:
-        validate_string("Reason", data["Reason"], min_len=1, max_len=2000)
+        cleaned = validate_free_text("Reason", data["Reason"])
+        validate_string("Reason", cleaned, min_len=1, max_len=500)
+        data["Reason"] = cleaned
+
+    return data

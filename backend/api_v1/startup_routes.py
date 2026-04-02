@@ -2,10 +2,11 @@ from flask import request, jsonify
 from backend.database.base import db
 from backend.database import Startups
 from backend.validation.startup_validation import validate_startup
-from backend.api_v1.routes import api_v1, row_to_dict
+from .routes import api_v1, row_to_dict
+
 import logging
 
-@api_v1.route("/startups", methods=["GET"])
+@api_v1.route("/startups/all", methods=["GET"])
 def get_startups():
     try:
         startups = Startups.query.all()

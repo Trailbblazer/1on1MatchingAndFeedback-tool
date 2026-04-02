@@ -2,7 +2,8 @@ from flask import request, jsonify
 from backend.database.base import db
 from backend.database import BannedToMeet
 from backend.validation.banned_validation import validate_banned_to_meet
-from .routes import api_v1, row_to_dict, parse_date
+from backend.date_utils import parse_date, parse_db_date
+from .routes import api_v1, row_to_dict
 
 @api_v1.route("/banned_to_meet", methods=["GET"])
 def get_banned_to_meet():

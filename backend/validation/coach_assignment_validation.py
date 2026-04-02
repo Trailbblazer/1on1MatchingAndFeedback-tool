@@ -12,11 +12,13 @@ def validate_coach_assignment(data):
         "SlotId"
     ])
 
-    # StartupName
-    validate_string("StartupName", data["StartupName"], min_len=2, max_len=100)
+    # StartupName (Unicode, numbers, and symbols)
+    cleaned_name = strip_whitespace(data["StartupName"])
+    validate_startup_name("StartupName", cleaned_name, min_len=1, max_len=100)
+    data["StartupName"] = cleaned_name
 
     # Slot
-    validate_string("Slot", data["Slot"], min_len=2, max_len=50)
+    data["Slot"] = validate_slot("Slot", data["Slot"])
 
     # Duration
     validate_int("Duration", data["Duration"], min_val=1, max_val=240)
@@ -28,3 +30,5 @@ def validate_coach_assignment(data):
     validate_int("CoachId", data["CoachId"], min_val=1)
     validate_int("StartupId", data["StartupId"], min_val=1)
     validate_int("SlotId", data["SlotId"], min_val=1)
+
+    return data

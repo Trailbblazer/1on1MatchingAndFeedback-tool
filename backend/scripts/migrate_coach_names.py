@@ -1,22 +1,31 @@
-import sys, os
+import sys, os, re
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from backend.database.base import db
 from backend.database.models.coaches import Coaches
 from backend.app import app
-
-# List of known titles to detect
-TITLES = {"Mr.", "Mrs.", "Miss", "Ms.", "Dr.", "Prof.", "Sir", "Madam", "Coach", "mr.", "mrs.", "miss", "ms.", "dr.", "prof.", "sir", "madam", "coach"}
+from backend.validation.base_validators import (
+    normalize_name,
+    insert_spaces_if_missing,
+    remove_invalid_symbols,
+    TITLES
+)
 
 def split_name(full_name):
-    # Split a full name into Title, FirstName, LastName.
-    # Handles cases like: 'Dr. Emma Stone', 'Mr. John Mentor', 'Anna Maria Smith', 'Cher'
-    parts = full_name.strip().split()
+    full_name = normalize_name(full_name)
+    full_name = insert_spaces_if_missing(full_name)
+    full_name = remove_invalid_symbols(full_name)
+
+    if not full_name:
+        return None, "", ""
+
+    parts = full_name.split()
     title = None
 
-    # Detect title (first word)
-    if parts and parts[0] in TITLES:
-        title = parts[0]
+    # Detect title
+    first_token = parts[0].lower()
+    if first_token in TITLES:
+        title = parts[0].capitalize().strip(".") + "."
         parts = parts[1:]  # Remove title from the list
 
     # If nothing left after removing title
@@ -26,9 +35,9 @@ def split_name(full_name):
     if len(parts) == 1:
         return title, parts[0], ""
 
-    # First name = everything except last word
-    first = " ".join(parts[:-1])
-    last = parts[-1]
+    # First name = first token, LastName = rest (middle + last)
+    first = parts[0]
+    last = " ".join(parts[1:])
     return title, first, last
 
 def migrate():
@@ -37,13 +46,12 @@ def migrate():
 
         for coach in coaches:
             title, first, last = split_name(coach.CoachName)
-
             coach.Title = title
             coach.FirstName = first
             coach.LastName = last
 
         db.session.commit()
-        print("Migration completed: CoachName → Title + FirstName + LastName")
+        print("Migration completed successfully: CoachName → Title + FirstName + LastName")
 
 if __name__ == "__main__":
     migrate()

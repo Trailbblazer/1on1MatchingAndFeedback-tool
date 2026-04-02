@@ -22,17 +22,6 @@ app.config['SQLALCHEMY_ECHO'] = True  # Show SQL in logs
 from backend.database.base import db
 db.init_app(app)
 
-# Import models so SQLAlchemy metadata includes them (even if PyCharm greys them out)
-from backend.database import (
-    BannedToMeet,
-    CoachAssignments,
-    Coaches,
-    CoachSlots,
-    DailyFeedback,
-    FeedbackHistory,
-    Startups,
-)
-
 # Register API blueprint(s)
 from backend.api_v1.routes import api_v1
 app.register_blueprint(api_v1, url_prefix='/api/v1')

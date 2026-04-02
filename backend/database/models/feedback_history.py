@@ -13,9 +13,9 @@ class FeedbackHistory(db.Model):
     DateUpdatedStartupGrade = db.Column(db.Date, nullable=True)
     DailyFeedbackId = db.Column(db.Integer, db.ForeignKey('daily_feedback.DailyFeedbackId'), nullable=False)
     StartupId = db.Column(db.Integer, db.ForeignKey('startups.StartupId'), nullable=False)
-    CoachId = db.Column(db.Integer, db.ForeignKey('coaches.CoachId'), nullable=False)
+    CoachId = db.Column(db.Integer, db.ForeignKey('coaches.CoachId', ondelete="SET NULL"), nullable=True)
 
     # Relationships
-    coach = db.relationship('Coaches', back_populates='feedback')
+    coach = db.relationship('Coaches', back_populates='feedback', passive_deletes=True)
     startup = db.relationship('Startups', back_populates='feedback')
     daily_feedback = db.relationship('DailyFeedback', back_populates='feedback_history')

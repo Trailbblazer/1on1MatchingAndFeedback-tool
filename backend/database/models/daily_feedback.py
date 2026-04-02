@@ -6,9 +6,9 @@ class DailyFeedback(db.Model):
     FeedbackText = db.Column(db.Text, nullable=True)
     Date = db.Column(db.Date, nullable=False)
     StartupId = db.Column(db.Integer, db.ForeignKey('startups.StartupId'), nullable=False)
-    CoachId = db.Column(db.Integer, db.ForeignKey('coaches.CoachId'), nullable=False)
+    CoachId = db.Column(db.Integer, db.ForeignKey('coaches.CoachId', ondelete="SET NULL"), nullable=True)
 
     # Relationships
-    coach = db.relationship('Coaches', back_populates='daily_feedback')
+    coach = db.relationship('Coaches', back_populates='daily_feedback', passive_deletes=True)
     startup = db.relationship('Startups', back_populates='daily_feedback')
     feedback_history = db.relationship('FeedbackHistory', back_populates='daily_feedback')

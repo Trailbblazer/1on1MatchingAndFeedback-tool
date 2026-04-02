@@ -1,8 +1,9 @@
 from .base_validators import *
 from werkzeug.exceptions import BadRequest
+from backend.validation.base_validators import auto_split_person_name
+
 def validate_coach(data, is_patch=False):
     # Allowed fields
-
     ALLOWED_FIELDS = {
         "Title",
         "FirstName",
@@ -17,12 +18,25 @@ def validate_coach(data, is_patch=False):
         "BatchesCoached"
     }
 
+    # Auto-split names before validation
+    title, first, last = auto_split_person_name(
+        data.get("FirstName"),
+        data.get("LastName")
+    )
+
+    if title:
+        data["Title"] = title
+    if first:
+        data["FirstName"] = first
+    if last:
+        data["LastName"] = last
+
     # Reject unknown fields
     for key in data.keys():
         if key not in ALLOWED_FIELDS:
             raise BadRequest({"error": f"Unknown field: {key}"})
 
-    # Required fields (for POST)
+    # Required fields for POST
     if not is_patch:
         REQUIRED_FIELDS = ["FirstName", "LastName", "Email"]
         require_fields(data, REQUIRED_FIELDS)
@@ -35,44 +49,48 @@ def validate_coach(data, is_patch=False):
     # Field validations
     # --------------------
 
-        # Title (optional)
-        if "Title" in data and data["Title"] is not None:
-            validate_string("Title", data["Title"], min_len=2, max_len=20)
+    # Title (optional, letters/numbers/spaces/hyphens)
+    if "Title" in data and data["Title"] is not None:
+        cleaned = strip_whitespace(data["Title"])
+        validate_string("Title", cleaned, min_len=2, max_len=20)
+        validate_role("Title", cleaned)
+        data["Title"] = cleaned
 
-        # FirstName
-        if "FirstName" in data:
-            validate_string("FirstName", data["FirstName"], min_len=1, max_len=60)
+    # FirstName (Unicode allowed)
+    if "FirstName" in data:
+        cleaned = strip_whitespace(data["FirstName"])
+        validate_unicode_name("FirstName", cleaned, min_len=1, max_len=50)
+        data["FirstName"] = cleaned
 
-        # LastName
-        if "LastName" in data:
-            validate_string("LastName", data["LastName"], min_len=1, max_len=60)
+    # LastName (Unicode allowed)
+    if "LastName" in data:
+        cleaned = strip_whitespace(data["LastName"])
+        validate_unicode_name("LastName", cleaned, min_len=1, max_len=60)
+        data["LastName"] = cleaned
 
     # Email
     if "Email" in data:
-        validate_string("Email", data["Email"], min_len=5, max_len=100)
-        if "@" not in data["Email"] or "." not in data["Email"]:
-            raise BadRequest({"error": "Invalid email format"})
+        data["Email"] = validate_email("Email", data["Email"])
 
-    # Phone
-    if "Phone" in data and data["Phone"] is not None:
-        validate_string("Phone", data["Phone"], min_len=3, max_len=100)
+    # Phone (free text but no emojis)
+    if "Phone" in data:
+        data["Phone"] = validate_coach_phone(data["Phone"])
 
-    # Chat
-    if "Chat" in data and data["Chat"] is not None:
-        validate_string("Chat", data["Chat"], min_len=2, max_len=100)
+    # Chat (free text but no emojis)
+    if "Chat" in data:
+        data["Chat"] = validate_coach_chat(data["Chat"])
 
-    # Bio
-    if "Bio" in data and data["Bio"] is not None:
-        validate_string("Bio", data["Bio"], min_len=1, max_len=500)
+    # Bio (free text, emojis allowed)
+    if "Bio" in data:
+        data["Bio"] = validate_coach_bio(data["Bio"])
 
-    # Expertise
-    if "Expertise" in data and data["Expertise"] is not None:
-        validate_string("Expertise", data["Expertise"], min_len=2, max_len=200)
+    # Expertise (free text, emojis allowed)
+    if "Expertise" in data:
+        data["Expertise"] = validate_coach_expertise(data["Expertise"])
 
-    # SocialMedia (must be a dict)
-    if "SocialMedia" in data and data["SocialMedia"] is not None:
-        if not isinstance(data["SocialMedia"], dict):
-            raise BadRequest({"error": "SocialMedia must be an object"})
+    # SocialMedia (must be dict)
+    if "SocialMedia" in data:
+        data["SocialMedia"] = validate_social_media("SocialMedia", data["SocialMedia"])
 
     # CoachingSessions
     if "CoachingSessions" in data:
@@ -81,3 +99,5 @@ def validate_coach(data, is_patch=False):
     # BatchesCoached
     if "BatchesCoached" in data:
         validate_int("BatchesCoached", data["BatchesCoached"], min_val=0)
+
+    return data
